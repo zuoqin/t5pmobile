@@ -10,9 +10,13 @@
                  [ring/ring-defaults "0.2.0"]
                  [bk/ring-gzip "0.1.1"]
                  [ring.middleware.logger "0.5.0"]
+                 [prismatic/om-tools "0.3.12"]
+                 [secretary "1.2.1"]
                  [compojure "1.5.0"]
                  [environ "1.0.2"]
-                 [org.omcljs/om "1.0.0-alpha31"]]
+                 [org.omcljs/om "1.0.0-alpha31"]
+                 [cljs-ajax "0.5.4"]
+                ]
 
   :plugins [[lein-cljsbuild "1.1.1"]
             [lein-environ "1.0.1"]]
@@ -44,6 +48,7 @@
                 ;; :figwheel {:on-jsload "t5pmobile.core/on-figwheel-reload"}
 
                 :compiler {:main t5pmobile.core
+                           :optimizations :none
                            :asset-path "js/compiled/out"
                            :output-to "resources/public/js/compiled/t5pmobile.js"
                            :output-dir "resources/public/js/compiled/out"
@@ -111,5 +116,5 @@
                           {:app
                            {:source-paths ^:replace ["src/cljs"]
                             :compiler
-                            {:optimizations :advanced
-                             :pretty-print false}}}}}})
+                            {:optimizations :none
+                             :pretty-print true}}}}}})

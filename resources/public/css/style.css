@@ -1,3 +1,20 @@
 h1 {
   text-decoration: underline;
 }
+.portrait {
+    width: 92px;
+}
+
+.tdtable {
+    vertical-align: middle !important;
+}
+
+
+.table_tr_background {
+	background-color:#F5F5F5;
+}
+
+.badge {
+    background-color: red !important;
+    color: white !important;
+}
