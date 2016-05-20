@@ -95,6 +95,8 @@
                      "Something")
               (dom/a (assoc style :href "#/messages") 
                      "Messages")
+              (dom/a (assoc style :href "#/leave") 
+                     "Leave")
               (dom/a (assoc style :href "#/login") 
                      "Logout")
       )

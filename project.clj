@@ -5,17 +5,21 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
 
   :dependencies [[org.clojure/clojure "1.8.0"]
+                 [org.clojure/core.async "0.2.374"]
                  [org.clojure/clojurescript "1.8.40" :scope "provided"]
                  [ring "1.4.0"]
                  [ring/ring-defaults "0.2.0"]
                  [bk/ring-gzip "0.1.1"]
                  [ring.middleware.logger "0.5.0"]
+                 [prismatic/schema "0.4.0"]
                  [prismatic/om-tools "0.3.12"]
                  [secretary "1.2.1"]
                  [compojure "1.5.0"]
                  [environ "1.0.2"]
+                 ;[bootstrap-cljs "0.28.1-0"]
+                 [racehub/om-bootstrap "0.5.0"]
                  [org.omcljs/om "1.0.0-alpha31"]
-                 [cljs-ajax "0.5.4"]
+                 [cljs-ajax "0.5.4"]                 
                 ]
 
   :plugins [[lein-cljsbuild "1.1.1"]
