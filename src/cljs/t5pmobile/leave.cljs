@@ -9,6 +9,8 @@
             [ajax.core :refer [GET POST]]
             [clojure.string :as str]
             [om-bootstrap.button :as b]
+            [om-bootstrap.panel :as p]
+            
   )
   (:import goog.History)
 )
@@ -17,12 +19,36 @@
 (def jquery (js* "$"))
 (defonce app-state (atom  {:leavetypes [] :leavecode "请选择"} ))
 
+(defn leaves-to-map [leave]
+  (let [     
+      newdata {(keyword (get leave "leavecode")) leave }
+    ]
+    newdata
+  )
+)
+
+(defn leaves-to-leavecodes [leave]
+  (let [     
+      newdata {:leavecode (get leave "leavecode") :name (get leave "name") }
+    ]
+    newdata
+  )
+  
+)
 
 (defn OnGetLeaveTypes [response]
+  ( let [ 
+    newdata (map leaves-to-map response)
+    leavecodes (map leaves-to-leavecodes response)
+  ]
+     
+     
+     (swap! app-state assoc :leavetypes  (into {} newdata) )
+     (swap! app-state assoc :leavecodes leavecodes) 
+  )
+   
 
-   (swap! app-state assoc :leavetypes  response)
-
-   (.log js/console (:leavetypes @app-state)) 
+   ;(.log js/console (:leavetypes @app-state)) 
 
 )
 
@@ -33,11 +59,16 @@
 )
 
 
+
+
+
+
+
 (defn getLeaveTypes [data]
  (.log js/console (str "token: " " " (:token  (first (:token @t5pcore/app-state)))       ))
 
  
-  (GET "http://localhost/T5PWebAPI/api/leavetype" {:handler OnGetLeaveTypes
+  (GET "http://localhost/T5PWebAPI/api/leavetype/leavetype2?type=0" {:handler OnGetLeaveTypes
                                             :error-handler error-handler
                                             :headers {:content-type "application/json" :Authorization (str "Bearer "  (:token  (first (:token @t5pcore/app-state)))) }
                                             })
@@ -66,9 +97,22 @@
   )
 )
 
+(defn setdatepickers []
+  (map (fn [text]
+    (jquery
+     (fn []
+       (-> (jquery (str "#" (get text "fieldcode")) )
+         (.datepicker {})
+       )      
+     )
+    )
+    (.log js/console (str "#" (get text "fieldcode") ))        
+    )  (get ((keyword (:leavecode @app-state)) (:leavetypes @app-state)) "fields" ) 
+  )
+)
 
 (defn alertselected [event]
-   ;(js/alert (str event  "ClojureScript says 'Boo!'" ))
+  ;(js/alert (str event  "ClojureScript says 'Boo!'" ))
   (swap! app-state assoc :leavecode  event)
 
   (jquery
@@ -78,18 +122,29 @@
      )
    )
   )
+  
+   ;(.log js/console (str "#" "leavefromdate" )) 
 
+    (jquery
+     (fn []
+       (-> (jquery (str "#" "leavefromdate") )
+         (.datepicker {})
+       )      
+     )
+    )
 )
 
 (defcomponent leave-page-view [data owner]
   (did-mount [_]
     (onMount data)
   )
+  (did-update [this prev-props prev-state]
+    ;(.log js/console "did updated!!!!!!!!!!!!!" )  
+    (setdatepickers)
+  )
   (render [_]
-    (dom/div {:className "panel panel-primary"}
-      (dom/div {:className "panel-heading"}
-        (dom/h3 {:className "panel-title"} "休假申请"
-        )
+    (p/panel (merge {:header (dom/h3 "休假申请" )} {:bs-style "primary"}
+      
       )
 
       (dom/div {:className "panel-body"}
@@ -103,24 +158,38 @@
                 {:id "leavebtngroup" }
                 (b/dropdown {:title (:leavecode @app-state) }
                   (map (fn [item]
-                    (b/menu-item {:key (get item "leavecode")  :on-select (fn [e](alertselected e))   } (get item "chinese"))
-                    )(:leavetypes data)
+                    (b/menu-item {:key (:leavecode item)  :on-select (fn [e](alertselected e))   } (:name item))
+                    )(:leavecodes data)
                   )                  
                 )
               )
             )
           )
 
-
-          (dom/div {:className "form-group"}
-            (dom/label {:className "col-sm-2 control-label"} 
-              (dom/span {:className "glyphicon glyphicon-time green"} "开始日期")
-              (dom/span {:style {:color "Red"}} "*")
-            )
-            (dom/div {:className "col-sm-10"}
-              (dom/input {:type "text" :id "datepicker"})
-            )
+          (map (fn [text]
+            (dom/div {:className "form-group"}
+              (dom/label {:className "col-sm-2 control-label"} 
+                (dom/span {} (get text "name"))
+                (if ( = (get text "required") true ) 
+                  (dom/span {:style {:color "Red"}} "*")
+                )
+              )
+              (dom/div {:className "col-sm-10"}
+                (cond 
+                  (= (get text "fieldtype") 1)
+                    (dom/input {:type "text" :id (get text "fieldcode")})
+                  (= (get text "fieldtype") 0)
+                    (dom/input {:type "text" :id (get text "fieldcode")})
+                )
+                
+                
+              )
+            )            
+            )  (get ((keyword (:leavecode data)) (:leavetypes @app-state)) "fields" ) 
           )
+
+
+
         )
       )
     )
