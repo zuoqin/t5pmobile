@@ -15,7 +15,7 @@
 
 (enable-console-print!)
 (def jquery (js* "$"))
-(defonce app-state (atom  {:leavetypes []} ))
+(defonce app-state (atom  {:leavetypes [] :leavecode "请选择"} ))
 
 
 (defn OnGetLeaveTypes [response]
@@ -57,17 +57,28 @@
 
 (defn onMount [data]
   (getLeaveTypes data)
-  ;;(jquery
-  ;;  (fn []
-  ;;    (-> (jquery "#sandbox-container input")
-  ;;      (.datepicker {})
-  ;;    )
-  ;;  )
-  ;;)
-
+  (jquery
+   (fn []
+     (-> (jquery "#datepicker")
+       (.datepicker {})
+     )
+   )
+  )
 )
+
+
 (defn alertselected [event]
-   (js/alert (str event  "ClojureScript says 'Boo!'" ))
+   ;(js/alert (str event  "ClojureScript says 'Boo!'" ))
+  (swap! app-state assoc :leavecode  event)
+
+  (jquery
+   (fn []
+     (-> (jquery "#leavebtngroup")
+       (.trigger  "click")
+     )
+   )
+  )
+
 )
 
 (defcomponent leave-page-view [data owner]
@@ -89,14 +100,25 @@
             )
             (dom/div {:className "col-sm-10"}
               (b/button-group
-                {}
-                (b/dropdown {:title "请选择" }
+                {:id "leavebtngroup" }
+                (b/dropdown {:title (:leavecode @app-state) }
                   (map (fn [item]
                     (b/menu-item {:key (get item "leavecode")  :on-select (fn [e](alertselected e))   } (get item "chinese"))
                     )(:leavetypes data)
                   )                  
                 )
               )
+            )
+          )
+
+
+          (dom/div {:className "form-group"}
+            (dom/label {:className "col-sm-2 control-label"} 
+              (dom/span {:className "glyphicon glyphicon-time green"} "开始日期")
+              (dom/span {:style {:color "Red"}} "*")
+            )
+            (dom/div {:className "col-sm-10"}
+              (dom/input {:type "text" :id "datepicker"})
             )
           )
         )
