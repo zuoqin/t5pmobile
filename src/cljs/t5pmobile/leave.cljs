@@ -1,4 +1,5 @@
 (ns t5pmobile.leave
+  (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [om.core :as om :include-macros true]
             [om-tools.dom :as dom :include-macros true]
             [om-tools.core :refer-macros [defcomponent]]
@@ -10,19 +11,43 @@
             [clojure.string :as str]
             [om-bootstrap.button :as b]
             [om-bootstrap.panel :as p]
+            [cljs.core.async :refer [put! dropping-buffer chan take! <!]]
+            [om-bootstrap.input :as i]
             
   )
   (:import goog.History)
 )
 
+
+(def ch (chan (dropping-buffer 2)))
 (enable-console-print!)
 (def jquery (js* "$"))
 (defonce app-state (atom  {:leavetypes [] :leavecode "请选择"} ))
 
+
+
+;(swap! app-state assoc-in [:leavetypes] {})
+;(swap! app-state assoc-in [:leavecodes] ())
+(defonce fieldnum (atom 0))
+
+(defn fields-to-map [fielddef]
+  (let [
+      newdata {(keyword (get fielddef "fieldcode"))  {:name (get fielddef "name") :fieldtype (get fielddef "fieldtype") :required (get fielddef "required") :num @fieldnum  } }
+    ]
+    (swap! fieldnum inc)
+    newdata
+  )
+)
+
 (defn leaves-to-map [leave]
   (let [     
-      newdata {(keyword (get leave "leavecode")) leave }
+      newdata {
+       (keyword (get leave "leavecode")) {
+         :fields (into {} (doall  (map fields-to-map (get leave "fields"))  ) )  
+         :name (get leave "name")} 
+       }
     ]
+    (reset! fieldnum 0)
     newdata
   )
 )
@@ -97,17 +122,40 @@
   )
 )
 
-(defn setdatepickers []
-  (map (fn [text]
+(defn setdatepicker [field]
+  (if (= (:fieldtype (nth field 1) ) 1 ) 
     (jquery
      (fn []
-       (-> (jquery (str "#" (get text "fieldcode")) )
+       (-> (jquery (str "#" (name (nth field 0) )) )
          (.datepicker {})
        )      
      )
-    )
-    (.log js/console (str "#" (get text "fieldcode") ))        
-    )  (get ((keyword (:leavecode @app-state)) (:leavetypes @app-state)) "fields" ) 
+    )  
+  )
+  ;(.log js/console (get field  "fieldcode"    )   )  
+  
+)
+
+(defn setdatepickers []
+  (let [fields  (:fields ((keyword (:leavecode @app-state)) (:leavetypes @app-state) ) ) ]
+    ;(.log js/console "Inside SetDate Pickers" )
+    ;(.log js/console (get (nth fields 2 ) "fieldcode"    )   )
+    (dorun (map setdatepicker fields   ))
+  )
+)
+
+
+
+(defn setdatepicker2 [field]
+  (.log js/console (:name (nth field 1)  ) )
+)
+
+
+(defn setdatepickers2 []
+  (let [fields (:fields ((keyword (:leavecode @app-state)) (:leavetypes @app-state) ) )  ]
+    ;(.log js/console "Inside SetDate Pickers" )
+    ;(.log js/console (get (nth fields 2 ) "fieldcode"    )   )
+    (dorun (map setdatepicker2 fields   ))
   )
 )
 
@@ -124,15 +172,25 @@
   )
   
    ;(.log js/console (str "#" "leavefromdate" )) 
+  ;(setdatepickers2)
 
-    (jquery
-     (fn []
-       (-> (jquery (str "#" "leavefromdate") )
-         (.datepicker {})
-       )      
-     )
-    )
 )
+
+(defn initqueue []
+  (doseq [n (range 1000)]
+    (go ;(while true)
+      (take! ch (fn [v] (
+                         setdatepickers
+                         ;.log js/console "Core.ASYNVC working!!!" 
+                         )       )  )
+
+    )
+  )
+)
+
+(initqueue)
+;(initqueue)
+;(initqueue)
 
 (defcomponent leave-page-view [data owner]
   (did-mount [_]
@@ -140,7 +198,7 @@
   )
   (did-update [this prev-props prev-state]
     ;(.log js/console "did updated!!!!!!!!!!!!!" )  
-    (setdatepickers)
+    (put! ch 42)
   )
   (render [_]
     (p/panel (merge {:header (dom/h3 "休假申请" )} {:bs-style "primary"}
@@ -169,23 +227,34 @@
           (map (fn [text]
             (dom/div {:className "form-group"}
               (dom/label {:className "col-sm-2 control-label"} 
-                (dom/span {} (get text "name"))
-                (if ( = (get text "required") true ) 
+                (dom/span {} (:name  (nth text 1)))
+                (if ( = (:required (nth text 1)  ) true ) 
                   (dom/span {:style {:color "Red"}} "*")
                 )
               )
               (dom/div {:className "col-sm-10"}
                 (cond 
-                  (= (get text "fieldtype") 1)
-                    (dom/input {:type "text" :id (get text "fieldcode")})
-                  (= (get text "fieldtype") 0)
-                    (dom/input {:type "text" :id (get text "fieldcode")})
+                  (= (:fieldtype (nth text 1)  )  0)
+                    (dom/input {:type "text" :id (name (first text) ) })
+                  (= (:fieldtype (nth text 1)  )  1)
+                    (dom/input {:type "text" :id (name (first text) ) })
+                  (= (:fieldtype (nth text 1)  )  2)
+                    (dom/input {:type "text" :id (name (first text) ) })
+
+                  (= (:fieldtype (nth text 1)  )  3)            
+                    (dom/input {:type "checkbox" :label (:name  (nth text 1)) :checked true}) 
+
                 )
                 
                 
               )
             )            
-            )  (get ((keyword (:leavecode data)) (:leavetypes @app-state)) "fields" ) 
+            )  (sort #(compare ( :num ( nth %1 1)) ( :num( nth %2 1))) (into[] (:fields ((keyword (:leavecode data)) (:leavetypes @app-state)))))   
+
+
+
+
+
           )
 
 
@@ -203,3 +272,6 @@
   (om/root leave-page-view
            app-state
            {:target (. js/document (getElementById "app"))}))
+
+
+
