@@ -32,7 +32,7 @@
 
 (defn fields-to-map [fielddef]
   (let [
-      newdata {(keyword (get fielddef "fieldcode"))  {:name (get fielddef "name") :fieldtype (get fielddef "fieldtype") :required (get fielddef "required") :num @fieldnum  } }
+      newdata {(keyword (get fielddef "fieldcode"))  {:name (get fielddef "name") :fieldtype (get fielddef "fieldtype") :required (get fielddef "required") :num @fieldnum :timeformat (get fielddef "timeformat") :hide (get fielddef "hide") } }
     ]
     (swap! fieldnum inc)
     newdata
@@ -123,7 +123,11 @@
 )
 
 (defn setdatepicker [field]
-  (if (= (:fieldtype (nth field 1) ) 1 ) 
+  (if (and
+      (= (:fieldtype (nth field 1) ) 1 )
+      (= (:timeformat (nth field 1) ) 0 )
+    ) 
+     
     (jquery
      (fn []
        (-> (jquery (str "#" (name (nth field 0) )) )
@@ -132,6 +136,23 @@
      )
     )  
   )
+
+  (if (and
+      (= (:fieldtype (nth field 1) ) 1 )
+      (= (:timeformat (nth field 1) ) 2 )
+    ) 
+     
+    (jquery
+     (fn []
+       (-> (jquery (str "#" (name (nth field 0) )) )
+         (.timepicker #js{:timeFormat "H:i:s" } )
+       )      
+     )
+    )  
+  )
+
+
+
   ;(.log js/console (get field  "fieldcode"    )   )  
   
 )
