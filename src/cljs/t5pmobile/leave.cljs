@@ -13,6 +13,8 @@
             [om-bootstrap.panel :as p]
             [cljs.core.async :refer [put! dropping-buffer chan take! <!]]
             [om-bootstrap.input :as i]
+            [cljs-time.core :as tm]
+            [cljs-time.format :as tf]
             
   )
   (:import goog.History)
@@ -122,6 +124,14 @@
   )
 )
 
+(defn handle-change [e]
+  (.log js/console (.. e -target -id) )  
+)
+
+(def custom-formatter1 (tf/formatter "MMM dd yyyy hh:mm:ss"))
+(def custom-formatter2 (tf/formatter "yyyy-MM-dd"))
+
+
 (defn setdatepicker [field]
   (if (and
       (= (:fieldtype (nth field 1) ) 1 )
@@ -131,10 +141,37 @@
     (jquery
      (fn []
        (-> (jquery (str "#" (name (nth field 0) )) )
-         (.datepicker {})
+         (.datepicker #js{:format "dd/mm/yyyy" })
+         (.on "show"
+           (fn [e] (
+              let [
+                ;;dt (js/Date (.. e -date))
+                ;dtstring (tf/parse custom-formatter1 (subs (str (.. e -date)  )  4 24)  )
+                dtstring (if
+                  (= (count (.. e -dates) ) 0)
+                    (tf/parse custom-formatter1 "May 26 2016 08:00:00"  )
+                    (tf/parse custom-formatter1 (subs (str (.. e -date)  )  4 24)  )
+                )
+
+
+              ]
+              ;;(swap! app-state assoc-in [:leavetypes :ivyt03 :fields :leavefromdate :value] (str (subs dt 8 10)  "/05/"    (subs dt 11 16)  ) )
+             ;;(.log js/console dt) 
+             ;;(.log js/console (str (.. e -date)  ) )
+             ;(.log js/console (count (.. e -dates)))
+             ;(.log js/console (subs (str (.. e -date)  ) 4 24))
+             (.log js/console (tf/unparse custom-formatter2 dtstring)) 
+             )
+           )
+         )
        )      
      )
     )  
+
+
+   
+
+
   )
 
   (if (and
@@ -210,15 +247,14 @@
 )
 
 (initqueue)
-;(initqueue)
-;(initqueue)
+
 
 (defcomponent leave-page-view [data owner]
   (did-mount [_]
     (onMount data)
   )
   (did-update [this prev-props prev-state]
-    ;(.log js/console "did updated!!!!!!!!!!!!!" )  
+    
     (put! ch 42)
   )
   (render [_]
@@ -256,14 +292,14 @@
               (dom/div {:className "col-sm-10"}
                 (cond 
                   (= (:fieldtype (nth text 1)  )  0)
-                    (dom/input {:type "text" :id (name (first text) ) })
+                    (dom/input {:type "text" :id (name (first text) ) :onChange #(handle-change %)})
                   (= (:fieldtype (nth text 1)  )  1)
-                    (dom/input {:type "text" :id (name (first text) ) })
+                    (dom/input {:type "text" :id (name (first text) ) :oninput #(handle-change %)})
                   (= (:fieldtype (nth text 1)  )  2)
-                    (dom/input {:type "text" :id (name (first text) ) })
+                    (dom/input {:type "text" :id (name (first text) ) :onChange #(handle-change %)})
 
                   (= (:fieldtype (nth text 1)  )  3)            
-                    (dom/input {:type "checkbox" :label (:name  (nth text 1)) :checked true}) 
+                    (dom/input {:type "checkbox" :label (:name  (nth text 1)) :checked true  :onChange #(handle-change %)}) 
 
                 )
                 

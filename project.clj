@@ -19,7 +19,8 @@
                  ;[bootstrap-cljs "0.28.1-0"]
                  [racehub/om-bootstrap "0.5.0"]
                  [org.omcljs/om "1.0.0-alpha31"]
-                 [cljs-ajax "0.5.4"]                 
+                 [cljs-ajax "0.5.4"]
+                 [com.andrewmcveigh/cljs-time "0.4.0"]
                 ]
 
   :plugins [[lein-cljsbuild "1.1.1"]
