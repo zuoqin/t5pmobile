@@ -15,8 +15,8 @@
             [om-bootstrap.input :as i]
             [cljs-time.core :as tm]
             [cljs-time.format :as tf]
-            [domina :as dominalib]
-            [domina.events :as dominaevents]
+            ;;[domina :as dominalib]
+            ;;[domina.events :as dominaevents]
             
   )
   (:import goog.History)
@@ -129,27 +129,26 @@
 (defn handle-chkb-change [e]
   ;(.log js/console (.. e -target -id) )  
   (.log js/console "The change ....")
-  (.preventDefault e)
   (.stopPropagation e)
   (.stopImmediatePropagation (.. e -nativeEvent) )
+  (swap! app-state assoc-in [:leaveapp (keyword  (.. e -currentTarget -id) )] 
+    (if (= true (.. e -currentTarget -checked)  ) 1 0)
+  ) 
   ;(set! (.-checked (.. e -currentTarget)) false)
   ;(dominalib/remove-attr!  (.. e -currentTarget) :checked)
-  (dominalib/set-attr!  (.. e -currentTarget) :checked true)
-  (dominaevents/stop-propagation e)
-  (dominaevents/prevent-default e)
+  ;;(dominalib/set-attr!  (.. e -currentTarget) :checked true)
 )
 
 (defn handle-chkb-click [e]
   ;(.log js/console (.. e -target -id) )  
   (.log js/console "The click ....")
-  (.preventDefault e)
   (.stopPropagation e)
   (.stopImmediatePropagation (.. e -nativeEvent) )
   ;(set! (.-checked (.. e -currentTarget)) false) 
   ;(dominalib/remove-attr!  (.. e -currentTarget) :checked)
-  (dominalib/set-attr!  (.. e -currentTarget) :checked true)
-  (dominaevents/stop-propagation e)
-  (dominaevents/prevent-default e)
+  ;;(dominalib/set-attr!  (.. e -currentTarget) :checked true)
+  ;;(dominaevents/stop-propagation e)
+  ;;(dominaevents/prevent-default e)
 )
 
 
@@ -352,7 +351,7 @@
                     (= (:fieldtype (nth text 1)  )  3)
                       (dom/input {:type "checkbox"   :id (name (first text)) :label (:name  (nth text 1))
                       ;;:onClick #(handle-chkb-click %)
-                      :onChange ( fn [e]( .stopPropagation e   )   ) 
+                      :onChange ( fn [e]( handle-chkb-change  e )   ) 
                       ;;#(handle-chkb-change %)
                                   }) 
 
