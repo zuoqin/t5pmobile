@@ -146,7 +146,7 @@
   )
   (render [_]
    (dom/div
-    ;(om/build t5pcore/navigation-view {})
+     (om/build t5pcore/website-view nil {})
      ;(om/build t5pcore/website-view t5pcore/app-state {})
      (dom/div #js {:className "panel panel-primary" :onClick (fn [e](displaymessages e))}
        (dom/div {:className "panel-heading"}
@@ -206,3 +206,5 @@
   (om/root message-page-view
            app-state
            {:target (. js/document (getElementById "app"))}))
+
+
