@@ -15,6 +15,8 @@
             [om-bootstrap.input :as i]
             [cljs-time.core :as tm]
             [cljs-time.format :as tf]
+            [domina :as dominalib]
+            [domina.events :as dominaevents]
             
   )
   (:import goog.History)
@@ -24,7 +26,7 @@
 (def ch (chan (dropping-buffer 2)))
 (enable-console-print!)
 (def jquery (js* "$"))
-(defonce app-state (atom  {:leavetypes [] :leavecode "请选择"} ))
+(defonce app-state (atom  {:view 0 :leavecode "" :leavetypes [] :leaveapp {:leavecode "请选择"} } ))
 
 
 
@@ -124,13 +126,42 @@
   )
 )
 
+(defn handle-chkb-change [e]
+  ;(.log js/console (.. e -target -id) )  
+  (.log js/console "The change ....")
+  (.preventDefault e)
+  (.stopPropagation e)
+  (.stopImmediatePropagation (.. e -nativeEvent) )
+  ;(set! (.-checked (.. e -currentTarget)) false)
+  ;(dominalib/remove-attr!  (.. e -currentTarget) :checked)
+  (dominalib/set-attr!  (.. e -currentTarget) :checked true)
+  (dominaevents/stop-propagation e)
+  (dominaevents/prevent-default e)
+)
+
+(defn handle-chkb-click [e]
+  ;(.log js/console (.. e -target -id) )  
+  (.log js/console "The click ....")
+  (.preventDefault e)
+  (.stopPropagation e)
+  (.stopImmediatePropagation (.. e -nativeEvent) )
+  ;(set! (.-checked (.. e -currentTarget)) false) 
+  ;(dominalib/remove-attr!  (.. e -currentTarget) :checked)
+  (dominalib/set-attr!  (.. e -currentTarget) :checked true)
+  (dominaevents/stop-propagation e)
+  (dominaevents/prevent-default e)
+)
+
+
 (defn handle-change [e]
-  (.log js/console (.. e -target -id) )  
+  ;(.log js/console (.. e -target -id) )  
+  (.log js/console "The run ....")
 )
 
 (def custom-formatter1 (tf/formatter "MMM dd yyyy hh:mm:ss"))
-(def custom-formatter2 (tf/formatter "yyyy-MM-dd"))
+(def custom-formatter2  (tf/formatter (:datemask (:User @t5pcore/app-state)) ))
 
+(def custom-formatter3 (tf/formatter "yyyyMMdd"))
 
 (defn setdatepicker [field]
   (if (and
@@ -160,7 +191,7 @@
              ;;(.log js/console (str (.. e -date)  ) )
              ;(.log js/console (count (.. e -dates)))
              ;(.log js/console (subs (str (.. e -date)  ) 4 24))
-             (.log js/console (tf/unparse custom-formatter2 dtstring)) 
+             (.log js/console (tf/unparse custom-formatter3 (tm/date-time 2010 10 3)))  ;;dtstring
              )
            )
          )
@@ -195,7 +226,7 @@
 )
 
 (defn setdatepickers []
-  (let [fields  (:fields ((keyword (:leavecode @app-state)) (:leavetypes @app-state) ) ) ]
+  (let [fields  (:fields ((keyword (:leavecode (:leaveapp @app-state) )) (:leavetypes @app-state) ) ) ]
     ;(.log js/console "Inside SetDate Pickers" )
     ;(.log js/console (get (nth fields 2 ) "fieldcode"    )   )
     (dorun (map setdatepicker fields   ))
@@ -219,7 +250,8 @@
 
 (defn alertselected [event]
   ;(js/alert (str event  "ClojureScript says 'Boo!'" ))
-  (swap! app-state assoc :leavecode  event)
+ 
+  ;(swap! app-state assoc :leavecode  event)
 
   (jquery
    (fn []
@@ -228,10 +260,10 @@
      )
    )
   )
-  
+  (swap! app-state assoc-in [:leaveapp :leavecode] event) 
    ;(.log js/console (str "#" "leavefromdate" )) 
   ;(setdatepickers2)
-
+  1
 )
 
 (defn initqueue []
@@ -248,6 +280,26 @@
 
 (initqueue)
 
+(defn OnCalcLeave [response]  
+  (.log js/console (str  (response) ))
+  ;;(.log js/console (str  (get (first response)  "Title") ))
+)
+
+(defn calcleave []
+  (POST "http://localhost/T5PWebAPI/api/leavecalc" {:handler OnCalcLeave
+                                            :error-handler error-handler
+                                            :headers {:content-type "application/json" :Authorization (str "Bearer "  (:token  (first (:token @t5pcore/app-state)))) }
+                                            :body (str 
+"{"
+  "\"leavecode\":\"" "LV04A"  "\"," 
+  "\"leavefromtime\":\"" "2016/05/01 08:00"  "\","
+  "\"leavetotime\":\"" "2016/05/01 18:00"  "\","
+  "\"notes\":\"" "from clojure mobile"  "\""
+"}") 
+                                            })
+)
+
+
 
 (defcomponent leave-page-view [data owner]
   (did-mount [_]
@@ -258,66 +310,74 @@
     (put! ch 42)
   )
   (render [_]
-    (p/panel (merge {:header (dom/h3 "休假申请" )} {:bs-style "primary"}
-      
-      )
+    (dom/div
+     (om/build t5pcore/website-view nil {})
+      (p/panel (merge {:header (dom/h3 "休假申请" )} {:bs-style "primary" :text-align "center"}  {:footer  ( b/button {:bs-style "primary" :onClick (fn [e](calcleave))} "Submit")}  )
 
-      (dom/div {:className "panel-body"}
-        (dom/form {:className "form-horizontal"}
-          (dom/div {:className "form-group"}
-            (dom/label {:className "col-sm-2 control-label"} "类型"
-              (dom/span {:style {:color "Red"}} "*")
-            )
-            (dom/div {:className "col-sm-10"}
-              (b/button-group
-                {:id "leavebtngroup" }
-                (b/dropdown {:title (:leavecode @app-state) }
-                  (map (fn [item]
-                    (b/menu-item {:key (:leavecode item)  :on-select (fn [e](alertselected e))   } (:name item))
-                    )(:leavecodes data)
-                  )                  
-                )
-              )
-            )
-          )
-
-          (map (fn [text]
+        (dom/div {:className "panel-body"}
+          (dom/form {:className "form-horizontal"}
             (dom/div {:className "form-group"}
-              (dom/label {:className "col-sm-2 control-label"} 
-                (dom/span {} (:name  (nth text 1)))
-                (if ( = (:required (nth text 1)  ) true ) 
-                  (dom/span {:style {:color "Red"}} "*")
-                )
+              (dom/label {:className "col-sm-2 control-label"} "类型"
+                (dom/span {:style {:color "Red"}} "*")
               )
               (dom/div {:className "col-sm-10"}
-                (cond 
-                  (= (:fieldtype (nth text 1)  )  0)
-                    (dom/input {:type "text" :id (name (first text) ) :onChange #(handle-change %)})
-                  (= (:fieldtype (nth text 1)  )  1)
-                    (dom/input {:type "text" :id (name (first text) ) :oninput #(handle-change %)})
-                  (= (:fieldtype (nth text 1)  )  2)
-                    (dom/input {:type "text" :id (name (first text) ) :onChange #(handle-change %)})
+                (b/button-group
+                  {:id "leavebtngroup" }
+                  (b/dropdown {:title (:leavecode (:leaveapp @app-state))  }
+                    (map (fn [item]
+                      (b/menu-item {:key (:leavecode item)  :on-select (fn [e](alertselected e))   } (:name item))
+                      )(:leavecodes data)
+                    )                  
+                  )
+                )
+              )
+            )
 
-                  (= (:fieldtype (nth text 1)  )  3)            
-                    (dom/input {:type "checkbox" :label (:name  (nth text 1)) :checked true  :onChange #(handle-change %)}) 
+            (map (fn [text]
+              (dom/div {:className "form-group"}
+                (dom/label {:className "col-sm-2 control-label"} 
+                  (dom/span {} (:name  (nth text 1)))
+                  (if ( = (:required (nth text 1)  ) true ) 
+                    (dom/span {:style {:color "Red"}} "*")
+                  )
+                )
+                (dom/div {:className "col-sm-10"}
+                  (cond 
+                    (= (:fieldtype (nth text 1)  )  0)
+                      (dom/input {:type "text" :id (name (first text) ) :onChange #(handle-change %)})
+                    (= (:fieldtype (nth text 1)  )  1)
+                      (dom/input {:type "text" :id (name (first text) ) :oninput #(handle-change %)})
+                    (= (:fieldtype (nth text 1)  )  2)
+                      (dom/input {:type "text" :id (name (first text) ) :onChange #(handle-change %)})
+                    (= (:fieldtype (nth text 1)  )  3)
+                      (dom/input {:type "checkbox"   :id (name (first text)) :label (:name  (nth text 1))
+                      ;;:onClick #(handle-chkb-click %)
+                      :onChange ( fn [e]( .stopPropagation e   )   ) 
+                      ;;#(handle-chkb-change %)
+                                  }) 
+
+                  )
+
 
                 )
-                
-                
+              )            
               )
-            )            
-            )  (sort #(compare ( :num ( nth %1 1)) ( :num( nth %2 1))) (into[] (:fields ((keyword (:leavecode data)) (:leavetypes @app-state)))))   
+              (sort 
+                #(compare ( :num ( nth %1 1)) ( :num( nth %2 1))) 
+              (into[] (:fields ((keyword (:leavecode (:leaveapp @app-state))) (:leavetypes @app-state)) )  )   
+)
 
 
+
+
+            )
 
 
 
           )
-
-
-
         )
-      )
+      
+      )    
     )
   )
 )
