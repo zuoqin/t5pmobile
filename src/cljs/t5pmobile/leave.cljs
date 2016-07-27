@@ -26,7 +26,7 @@
 (def ch (chan (dropping-buffer 2)))
 (enable-console-print!)
 (def jquery (js* "$"))
-(defonce app-state (atom  {:view 0 :leavecode "" :leavetypes [] :leaveapp {:leavecode "请选择"} } ))
+(defonce app-state (atom  {:view 0 :leavecode "" :leavetypes [] :leaveapp {:leavecode "请选择"} } )) ;; :leavedays 0 :leavehours 0
 
 
 
@@ -42,6 +42,7 @@
         :hide (get fielddef "hide") :values (get fielddef "values")} }
     ]
     (swap! fieldnum inc)
+
     newdata
   )
 )
@@ -85,6 +86,23 @@
 )
 
 
+(defn OnCalcLeaveDays [response]
+  ( let [ 
+    newdata (map leaves-to-map response)
+    leavecodes (map leaves-to-leavecodes response)
+  ]
+     
+     
+     (swap! app-state assoc :leavetypes  (into {} newdata) )
+     (swap! app-state assoc :leavecodes leavecodes) 
+  )
+   
+
+   ;(.log js/console (:leavetypes @app-state)) 
+
+)
+
+
 
 (defn error-handler [{:keys [status status-text]}]
   (.log js/console (str "something bad happened: " status " " status-text))
@@ -93,6 +111,17 @@
 
 
 
+
+(defn calcLeaveDays []
+  (POST "http://localhost/T5PWebAPI/api/empleave" {:handler OnCalcLeaveDays
+                                            :error-handler error-handler
+                                            :headers {:content-type "application/json" 
+                                                      :Authorization (str "Bearer "  (:token  (first (:token @t5pcore/app-state))))
+                                            }
+                                            :format :json
+                                            :params (:leaveapp @app-state)
+                                            })
+)
 
 
 
@@ -131,7 +160,7 @@
 
 (defn handle-chkb-change [e]
   ;(.log js/console (.. e -target -id) )  
-  (.log js/console "The change ....")
+  ;(.log js/console "The change ....")
   (.stopPropagation e)
   (.stopImmediatePropagation (.. e -nativeEvent) )
   (swap! app-state assoc-in [:leaveapp (keyword  (.. e -currentTarget -id) )] 
@@ -161,65 +190,74 @@
 )
 
 (def custom-formatter1 (tf/formatter "MMM dd yyyy hh:mm:ss"))
-(def custom-formatter2  (tf/formatter (:datemask (:User @t5pcore/app-state)) ))
+;(def custom-formatter2  (tf/formatter (:datemask (:User @t5pcore/app-state)) ))
 
-(def custom-formatter3 (tf/formatter "yyyyMMdd"))
+(def custom-formatter3 (tf/formatter "yyyy/MM/dd"))
 
 (defn setdatepicker [field]
-  (if (and
-      (= (:fieldtype (nth field 1) ) 1 )
-      (= (:timeformat (nth field 1) ) 0 )
-    ) 
-     
-    (jquery
-     (fn []
-       (-> (jquery (str "#" (name (nth field 0) )) )
-         (.datepicker #js{:format "dd/mm/yyyy" })
-         (.on "show"
-           (fn [e] (
-              let [
-                ;;dt (js/Date (.. e -date))
-                ;dtstring (tf/parse custom-formatter1 (subs (str (.. e -date)  )  4 24)  )
-                dtstring (if
-                  (= (count (.. e -dates) ) 0)
-                    (tf/parse custom-formatter1 "May 26 2016 08:00:00"  )
-                    (tf/parse custom-formatter1 (subs (str (.. e -date)  )  4 24)  )
-                )
+  (let [custom-formatter2  (tf/formatter (:datemask (:User @t5pcore/app-state)) )] 
 
 
-              ]
-              ;;(swap! app-state assoc-in [:leavetypes :ivyt03 :fields :leavefromdate :value] (str (subs dt 8 10)  "/05/"    (subs dt 11 16)  ) )
-             ;;(.log js/console dt) 
-             ;;(.log js/console (str (.. e -date)  ) )
-             ;(.log js/console (count (.. e -dates)))
-             ;(.log js/console (subs (str (.. e -date)  ) 4 24))
-             (.log js/console (tf/unparse custom-formatter3 (tm/date-time 2010 10 3)))  ;;dtstring
+    (if (and
+        (= (:fieldtype (nth field 1) ) 1 )
+        (= (:timeformat (nth field 1) ) 0 )
+      ) 
+
+      (jquery
+       (fn []
+         (-> (jquery (str "#" (name (nth field 0) )) )
+           (.datepicker #js{:format "dd/mm/yyyy" })
+           (.on "show"
+             (fn [e] (
+                let [
+                  ;;dt (js/Date (.. e -date))
+                  ;dtstring (tf/parse custom-formatter1 (subs (str (.. e -date)  )  4 24)  )
+                  dtstring (if
+                    (= (count (.. e -dates) ) 0)
+                      (tf/parse custom-formatter1 "May 26 2016 08:00:00"  )
+                      (tf/parse custom-formatter1 (subs (str (.. e -date)  )  4 24)  )
+                  )
+
+
+                ]
+                ;;(swap! app-state assoc-in [:leavetypes :ivyt03 :fields :leavefromdate :value] (str (subs dt 8 10)  "/05/"    (subs dt 11 16)  ) )
+               ;;(.log js/console dt) 
+               ;;(.log js/console (str (.. e -date)  ) )
+               ;(.log js/console (count (.. e -dates)))
+               ;(.log js/console (subs (str (.. e -date)  ) 4 24))
+               (.log js/console (tf/unparse custom-formatter2 dtstring))
+               (swap! app-state assoc-in [:leaveapp (keyword (.. e -target -id))] (tf/unparse custom-formatter2 dtstring)) 
+               )
              )
            )
-         )
-       )      
-     )
-    )  
+         )      
+       )
+      )  
 
 
-   
+
+
+
+    )
+
+    (if (and
+        (= (:fieldtype (nth field 1) ) 1 )
+        (= (:timeformat (nth field 1) ) 2 )
+      ) 
+
+      (jquery
+       (fn []
+         (-> (jquery (str "#" (name (nth field 0) )) )
+           (.timepicker #js{:timeFormat "H:i:s" } )
+         )      
+       )
+      )  
+    )
+
 
 
   )
 
-  (if (and
-      (= (:fieldtype (nth field 1) ) 1 )
-      (= (:timeformat (nth field 1) ) 2 )
-    ) 
-     
-    (jquery
-     (fn []
-       (-> (jquery (str "#" (name (nth field 0) )) )
-         (.timepicker #js{:timeFormat "H:i:s" } )
-       )      
-     )
-    )  
-  )
 
 
 
@@ -236,6 +274,40 @@
 )
 
 
+(defn setcalculatedfield [field] 
+    ;(.log js/console (keyword  (nth field 0) )  )
+    ;(.log js/console (get (nth fields 2 ) "fieldcode"    )   )
+
+
+  ;; leavedays, leavehours - these fields are calculated fields, set initial values to 0
+  (if (= (:fieldtype (nth field 1)) 5)
+    (if (=   ( (keyword  (nth field 0) ) (:leaveapp @app-state)) nil)
+      (swap! app-state assoc-in [:leaveapp (keyword  (nth field 0) )] 
+        0
+      )    
+    )
+  )
+
+
+  ;; boolean fields initialize to TRUE
+  (if (= (:fieldtype (nth field 1)) 3)
+    (if (=   ( (keyword  (nth field 0) ) (:leaveapp @app-state)) nil)
+      (swap! app-state assoc-in [:leaveapp (keyword  (nth field 0) )] 
+        1
+      ) 
+    )
+  )
+)
+
+
+(defn setcalculatedfields []
+  (let [fields  (:fields ((keyword (:leavecode (:leaveapp @app-state) )) (:leavetypes @app-state) ) ) ]
+    ;(.log js/console "Inside  setcalculatedfields" )
+    ;(.log js/console (get (nth fields 2 ) "fieldcode"    )   )
+    (dorun (map setcalculatedfield fields   ))
+  )
+)
+
 
 (defn setdatepicker2 [field]
   (.log js/console (:name (nth field 1)  ) )
@@ -250,6 +322,10 @@
   )
 )
 
+(defn setcontrols []
+  (setdatepickers)
+  (setcalculatedfields)
+)
 
 (defn alertselected1 [event param]
   ;(js/alert (str event  "ClojureScript says 'Boo!'" ))
@@ -263,7 +339,7 @@
      )
    )
   )
-  (swap! app-state assoc-in [:leaveapp (keyword param)] event) 
+  (swap! app-state assoc-in [:leaveapp (keyword param)] event)
    (.log js/console (str "#" param )) 
   ;(setdatepickers2)
   1
@@ -291,37 +367,91 @@
 (defn initqueue []
   (doseq [n (range 1000)]
     (go ;(while true)
-      (take! ch (fn [v] (
-                         setdatepickers
-                         ;.log js/console "Core.ASYNVC working!!!" 
-                         )       )  )
-
+      (take! ch (
+        fn [v] (
+                                        ;(setcalculatedfields) 
+           setcontrols 
+                                        ;.log js/console "Core.ASYNVC working!!!" 
+        )
+      ))
     )
   )
 )
 
 (initqueue)
 
-(defn OnCalcLeave [response]  
-  (.log js/console (str  (response) ))
+(defn leave-to-state [leave]
+  (let [     
+      newdata {:leavecode (get leave "leavecode") :name (get leave "name") }
+    ]
+    newdata
+  )
+  
+)
+
+(defn OnCalcLeave [response]
+  (let [     
+      newdata {:leavedays (get response "leavedays") :leavehours (get response "leavehours") }
+    ]
+
+    (swap! app-state assoc-in [:leaveapp :leavedays] 
+      (:leavedays newdata)
+    ) 
+    (.log js/console (str  (:leavedays newdata) ))
+  )
+  
   ;;(.log js/console (str  (get (first response)  "Title") ))
 )
+
 
 (defn calcleave []
   (POST "http://localhost/T5PWebAPI/api/leavecalc" {:handler OnCalcLeave
                                             :error-handler error-handler
-                                            :headers {:content-type "application/json" :Authorization (str "Bearer "  (:token  (first (:token @t5pcore/app-state)))) }
-                                            :body (str 
-"{"
-  "\"leavecode\":\"" "LV04A"  "\"," 
-  "\"leavefromtime\":\"" "2016/05/01 08:00"  "\","
-  "\"leavetotime\":\"" "2016/05/01 18:00"  "\","
-  "\"notes\":\"" "from clojure mobile"  "\""
-"}") 
+                                            :headers {
+                                              :content-type "application/json"
+                                              :Authorization (str "Bearer "  (:token  (first (:token @t5pcore/app-state)))) }
+                                            :format :json
+                                            :params (:leaveapp @app-state)
                                             })
 )
 
 
+(defn CheckCalcLeave []
+  (if (=  
+      (and ( = (nil? (:leavefromdate (:leaveapp @app-state)))  false)
+           ( = (nil? (:leavetodate (:leaveapp @app-state)))  false)
+           ( = (nil? (:leavecode (:leaveapp @app-state)))  false)
+      ) true 
+    )
+    calcleave
+  )
+  
+)
+
+(defn desplayComboboxField [text]
+  (dom/div {:className "col-sm-10"}
+    (b/button-group
+      {:id  (name (first text) ) }
+      (b/dropdown {:title
+      (if
+        (= ( (keyword (nth text 0)) (:leaveapp @app-state)) nil )
+          (:name  (nth text 1))  
+          ( (keyword (nth text 0)) (:leaveapp @app-state))  
+
+      ) 
+
+      }
+        (map (fn [item]
+          (b/menu-item {:key (get item "code")
+            :on-select  (fn [e](alertselected1 e (name (first text) )))
+          } (get item "value"))
+          )(:values (nth text 1))
+        )                  
+      )
+    )
+  )
+
+)
 
 (defcomponent leave-page-view [data owner]
   (did-mount [_]
@@ -366,41 +496,19 @@
                 (dom/div {:className "col-sm-10"}
                   (cond 
                     (= (:fieldtype (nth text 1)  )  0)
-                      ;;(dom/input {:type "text" :id (name (first text) ) :onChange #(handle-change %)})
-                      (dom/div {:className "col-sm-10"}
-                        (b/button-group
-                          {:id  (name (first text) ) }
-                          (b/dropdown {:title
-                          (if
-                            (= ( (keyword (nth text 0)) (:leaveapp @app-state)) nil )
-                              (:name  (nth text 1))  
-                              ( (keyword (nth text 0)) (:leaveapp @app-state))  
-
-                          ) 
-
-                          }
-                            (map (fn [item]
-                              (b/menu-item {:key (get item "code")
-                                :on-select  (fn [e](alertselected1 e (name (first text) )))
-                              } (get item "value"))
-                              )(:values (nth text 1))
-                            )                  
-                          )
-                        )
-                      )
-                    
+                      (desplayComboboxField text)
                     (= (:fieldtype (nth text 1)  )  1)
                       (dom/input {:type "text" :id (name (first text) ) :oninput #(handle-change %)})
                     (= (:fieldtype (nth text 1)  )  2)
                       (dom/input {:type "text" :id (name (first text) ) :onChange #(handle-change %)})
                     (= (:fieldtype (nth text 1)  )  3)
-                      (dom/input {:type "checkbox"   :id (name (first text)) :label (:name  (nth text 1))
-                      ;;:onClick #(handle-chkb-click %)
+                      (dom/input {:type "checkbox" :defaultChecked true :id (name (first text)) :label (:name  (nth text 1))
                       :onChange ( fn [e]( handle-chkb-change  e )   ) 
                       }) 
+                    (= (:fieldtype (nth text 1)  )  5)
+                      (dom/input {:type "text" :disabled true :value ((keyword (name (first text) )) (:leaveapp @app-state))  :ref (name (first text) ) :id (name (first text) )})
+
                   )
-
-
                 )
               )            
               )
