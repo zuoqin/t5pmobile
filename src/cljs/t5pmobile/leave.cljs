@@ -36,7 +36,10 @@
 
 (defn fields-to-map [fielddef]
   (let [
-      newdata {(keyword (get fielddef "fieldcode"))  {:name (get fielddef "name") :fieldtype (get fielddef "fieldtype") :required (get fielddef "required") :num @fieldnum :timeformat (get fielddef "timeformat") :hide (get fielddef "hide") } }
+      newdata {(keyword (get fielddef "fieldcode")){
+        :name (get fielddef "name") :fieldtype (get fielddef "fieldtype")
+        :required (get fielddef "required") :num @fieldnum :timeformat (get fielddef "timeformat")
+        :hide (get fielddef "hide") :values (get fielddef "values")} }
     ]
     (swap! fieldnum inc)
     newdata
@@ -247,6 +250,26 @@
   )
 )
 
+
+(defn alertselected1 [event param]
+  ;(js/alert (str event  "ClojureScript says 'Boo!'" ))
+ 
+  ;(swap! app-state assoc :leavecode  event)
+
+  (jquery
+   (fn []
+     (-> (jquery (str "#" param ))
+       (.trigger  "click")
+     )
+   )
+  )
+  (swap! app-state assoc-in [:leaveapp (keyword param)] event) 
+   (.log js/console (str "#" param )) 
+  ;(setdatepickers2)
+  1
+)
+
+
 (defn alertselected [event]
   ;(js/alert (str event  "ClojureScript says 'Boo!'" ))
  
@@ -343,7 +366,29 @@
                 (dom/div {:className "col-sm-10"}
                   (cond 
                     (= (:fieldtype (nth text 1)  )  0)
-                      (dom/input {:type "text" :id (name (first text) ) :onChange #(handle-change %)})
+                      ;;(dom/input {:type "text" :id (name (first text) ) :onChange #(handle-change %)})
+                      (dom/div {:className "col-sm-10"}
+                        (b/button-group
+                          {:id  (name (first text) ) }
+                          (b/dropdown {:title
+                          (if
+                            (= ( (keyword (nth text 0)) (:leaveapp @app-state)) nil )
+                              (:name  (nth text 1))  
+                              ( (keyword (nth text 0)) (:leaveapp @app-state))  
+
+                          ) 
+
+                          }
+                            (map (fn [item]
+                              (b/menu-item {:key (get item "code")
+                                :on-select  (fn [e](alertselected1 e (name (first text) )))
+                              } (get item "value"))
+                              )(:values (nth text 1))
+                            )                  
+                          )
+                        )
+                      )
+                    
                     (= (:fieldtype (nth text 1)  )  1)
                       (dom/input {:type "text" :id (name (first text) ) :oninput #(handle-change %)})
                     (= (:fieldtype (nth text 1)  )  2)
@@ -352,9 +397,7 @@
                       (dom/input {:type "checkbox"   :id (name (first text)) :label (:name  (nth text 1))
                       ;;:onClick #(handle-chkb-click %)
                       :onChange ( fn [e]( handle-chkb-change  e )   ) 
-                      ;;#(handle-chkb-change %)
-                                  }) 
-
+                      }) 
                   )
 
 
@@ -363,8 +406,11 @@
               )
               (sort 
                 #(compare ( :num ( nth %1 1)) ( :num( nth %2 1))) 
-              (into[] (:fields ((keyword (:leavecode (:leaveapp @app-state))) (:leavetypes @app-state)) )  )   
-)
+                (filter (fn [x] ( not= (keyword (nth x 0)) :leavecode  )         )
+                  (into[] (:fields ((keyword (:leavecode (:leaveapp @app-state))) (:leavetypes @app-state)) )  )   
+                )
+                
+              )
 
 
 
