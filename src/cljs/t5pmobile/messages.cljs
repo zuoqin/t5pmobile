@@ -13,15 +13,16 @@
 
 (enable-console-print!)
 
-(defonce app-state (atom  {:page 0 :msgcount 0, :myappcount 0, :pendingapps 0, :showmessages 0, :messages []} ))
+(defonce app-state (atom  {:page 0 :msgcount 0, :myappcount 0, :pendingapps 0, :showmessages 0, :showapplications 0, :messages []} ))
 
 
 (defn OnGetMessages [response]
    ;(swap! app-state assoc :page inc)
+   (swap! app-state assoc :myapplications  (get response "MyApplications")  )
    (swap! app-state assoc :messages  (get response "Messages")  )
    (swap! app-state assoc :msgcount (get (get response "Data") "msgcount") )
    (swap! app-state assoc :myappcount  (clojure.core/count (get response "MyApplications")) )
-    (swap! app-state assoc :pendingapps  (clojure.core/count (get response "PendingApplications")) )
+   (swap! app-state assoc :pendingapps  (clojure.core/count (get response "PendingApplications")) )
    ;(update-in app-state [:messages :myappcount] assoc (clojure.core/count (get response "MyApplications")) )
    ;(update-in app-state [:messages :pendingapps] assoc (clojure.core/count (get response "PendingApplications")) )
    ;(swap! t5pcore/app-state assoc-in [:messages] app-state )
@@ -47,8 +48,10 @@
 )
 
 
+
+
 (defn getMessages [data]
- (.log js/console (str "token: " " " (:token  (first (:token @t5pcore/app-state)))       ))
+  ;(.log js/console (str "token: " " " (:token  (first (:token @t5pcore/app-state)))       ))
   ;(swap! t5pcore/app-state assoc-in [:messages] (conj (:messages data) {:showmessages 0}) )
   ;(swap! t5pcore/app-state  assoc-in [:messages] {:showmessages 0} )
  
@@ -78,6 +81,19 @@
 )
 
 
+(defn displayapplications [event]
+  ( let [ 
+      ;olddata (:messages app-state)
+      isshow (:showapplications @app-state)
+      
+      newdata ( if (= isshow 1) 0 1 )      
+    ]
+    ;(.log js/console "call to displaymessages function")
+    (swap! app-state assoc :showapplications newdata )
+    ;(swap! app-state assoc-in [:messages] newdata )
+  )
+)
+
 (defn displaymessages [event]
   ( let [ 
       ;olddata (:messages app-state)
@@ -98,6 +114,30 @@
   )
 )
 
+
+(defcomponent showapplications-view [data owner]
+  (render
+    [_]
+    (dom/div {:className "list-group" :style {:display "block"}}
+      (map (fn [item]
+        (dom/span
+          (dom/a {:className "list-group-item"}
+            (dom/h4 {:className "list-group-item-heading"} 
+              (dom/span {:className "label label-success"} (str "#" (get item "forminstanceid")))  
+              (str " - " (get item "leavetype") " - "   (get item "applicantname") )
+            )
+            (dom/p {:className "paddingleft2"} (str "提交 "(get item "submittime")) )
+            (dom/p {:className "list-group-item-text paddingleft2"}
+              (str "开始日期: " (get item "leavefromdate") " 结束日期:   "   (get item "leavetodate") ", "   (get item "leavedays")  " 天") )
+          ) 
+        )               
+        )(:myapplications data)
+      )
+    )
+  )
+)
+
+
 (defcomponent showmessages-view [data owner]
   (render
     [_]
@@ -109,7 +149,7 @@
             (dom/h6 {:className "paddingleft2"} (get item "senddate"))
             (dom/p {:className "list-group-item-text paddingleft2"} (get item "body"))
           ) 
-        )                
+        )                  
         )(:messages data)
       )
       (dom/div {:style {:display "block"}}
@@ -118,6 +158,25 @@
     )
   )
 )
+
+
+(defmulti myapplications-view (
+  fn [data owner] (:showapplications data )
+  )
+)
+
+
+
+(defmethod myapplications-view 0
+  [data owner] 
+  (empty-view data owner)
+)
+
+(defmethod myapplications-view 1
+  [data owner] 
+  (showapplications-view data owner)
+)
+
 
 (defmulti mymessages-view (
   fn [data owner] (:showmessages data )
@@ -164,7 +223,7 @@
      )
 
 
-     (dom/div {:className "panel panel-primary"}
+     (dom/div {:className "panel panel-primary"  :onClick (fn [e](displayapplications e))}
        (dom/div {:className "panel-heading"}
          (dom/div {:className "row"}
            (dom/div {:className "col-md-10"}
@@ -176,8 +235,8 @@
 
           )
        )
-
-      )
+       (om/build myapplications-view  data {})
+     )
 
 
      (dom/div {:className "panel panel-primary"}

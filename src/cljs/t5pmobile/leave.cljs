@@ -15,9 +15,6 @@
             [om-bootstrap.input :as i]
             [cljs-time.core :as tm]
             [cljs-time.format :as tf]
-            ;;[domina :as dominalib]
-            ;;[domina.events :as dominaevents]
-            
   )
   (:import goog.History)
 )
@@ -129,9 +126,27 @@
            )))
 )
 
-(defn OnApplyLeave [response]
+
+(defn setLeaveAppError [newLeaveApp]
+  (swap! app-state assoc-in [:modalTitle] 
+    (str "New Leave Application Failed")
+  ) 
+
+  (swap! app-state assoc-in [:modalText] 
+    (str  (:error newLeaveApp))
+  ) 
+  ;(.log js/console (str  (:error newLeaveApp) ))
+  (jquery
+     (fn []
+       (-> (jquery "#leaveModal")
+           (.modal)
+           )))
+)
+
+
+(defn OnApplyLeaveSuccess [response]
   (let [     
-      newdata {:forminstanceid (get response "forminstanceid") :msg (get response "msg") }
+      newdata {:forminstanceid (get response "forminstanceid") :msg (get response "error") }
     ]
 
 
@@ -151,20 +166,31 @@
 
 
 
+(defn OnApplyLeaveError [response]
+  (let [     
+      newdata { :error (get (:response response)  "error") }
+    ]
+   
+    (setLeaveAppError newdata)
+  )
+  
+  ;(.log js/console (str  response ))
+)
+
 
 (defn applyLeave []
-  (let [res {"forminstanceid"  888 "msg"  "Succeeded"}] 
-    (OnApplyLeave res)
+  ;; (let [res {"forminstanceid"  888 "msg"  "Succeeded"}] 
+  ;;   (OnApplyLeave res)
 
-  )
-  ;; (POST "http://localhost/T5PWebAPI/api/empleave" {:handler OnApplyLeave
-  ;;                                           :error-handler error-handler
-  ;;                                           :headers {:content-type "application/json" 
-  ;;                                                     :Authorization (str "Bearer "  (:token  (first (:token @t5pcore/app-state))))
-  ;;                                           }
-  ;;                                           :format :json
-  ;;                                           :params (:leaveapp @app-state)
-  ;;                                           })
+  ;; )
+  (POST "http://localhost/T5PWebAPI/api/empleave" {:handler OnApplyLeaveSuccess
+                                            :error-handler OnApplyLeaveError
+                                            :headers {:content-type "application/json" 
+                                                      :Authorization (str "Bearer "  (:token  (first (:token @t5pcore/app-state))))
+                                            }
+                                            :format :json
+                                            :params (:leaveapp @app-state)
+                                            })
 )
 
 
@@ -258,16 +284,16 @@
 (defn calcleave []
   (.log js/console "Starting post leave calculation" ) 
   (POST "http://localhost/T5PWebAPI/api/leavecalc" {
-                                                    :handler OnCalcLeave
-                                                    :error-handler error-handler
-                                                    :headers {
-                                                              :content-type "application/json"
-                                                              :Authorization (str "Bearer "  (:token  (first (:token @t5pcore/app-state)))) }
-                                                    :format :json
-                                                    :params (:leaveapp @app-state)
-                                                    }    
+    :handler OnCalcLeave
+    :error-handler error-handler
+    :headers {
+              :content-type "application/json"
+              :Authorization (str "Bearer "  (:token  (first (:token @t5pcore/app-state)))) }
+    :format :json
+    :params (:leaveapp @app-state)
+    }
    
-   )
+  )
 )
 
 (defn IsCheckLeave? []
