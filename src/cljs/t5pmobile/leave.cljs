@@ -26,7 +26,7 @@
 (def ch (chan (dropping-buffer 2)))
 (enable-console-print!)
 (def jquery (js* "$"))
-(defonce app-state (atom  {:view 0 :leavecode "" :leavetypes [] :leaveapp {:leavecode "请选择"} } )) ;; :leavedays 0 :leavehours 0
+(defonce app-state (atom  {:modalText "THis the MOdal text" :modalTitle "This is the Modal Title"  :view 0 :leavecode "" :leavetypes [] :leaveapp {:leavecode "请选择"} } )) ;; :leavedays 0 :leavehours 0
 
 
 
@@ -109,18 +109,62 @@
 )
 
 
+(defn setNewLeaveApp [newLeaveApp]
+  (swap! app-state assoc-in [:leaveapp :forminstanceid] 
+    (:forminstanceid newLeaveApp)
+  ) 
+
+  (swap! app-state assoc-in [:modalTitle] 
+    (str "New Leave Application Succeeded")
+  ) 
+
+  (swap! app-state assoc-in [:modalText] 
+    (str "New Leave Application " (:forminstanceid newLeaveApp))
+  ) 
+  ;(.log js/console (str  (:forminstanceid newLeaveApp) ))
+  (jquery
+     (fn []
+       (-> (jquery "#leaveModal")
+           (.modal)
+           )))
+)
+
+(defn OnApplyLeave [response]
+  (let [     
+      newdata {:forminstanceid (get response "forminstanceid") :msg (get response "msg") }
+    ]
+
+
+    (if (= (:forminstanceid newdata) nil)
+      (jquery
+         (fn []
+           (-> (jquery "#leaveModal")
+               (.modal)
+               )))
+      (setNewLeaveApp newdata)
+    )
+  )
+  
+  ;;(.log js/console (str  (get (first response)  "Title") ))
+)
 
 
 
-(defn calcLeaveDays []
-  (POST "http://localhost/T5PWebAPI/api/empleave" {:handler OnCalcLeaveDays
-                                            :error-handler error-handler
-                                            :headers {:content-type "application/json" 
-                                                      :Authorization (str "Bearer "  (:token  (first (:token @t5pcore/app-state))))
-                                            }
-                                            :format :json
-                                            :params (:leaveapp @app-state)
-                                            })
+
+
+(defn applyLeave []
+  (let [res {"forminstanceid"  888 "msg"  "Succeeded"}] 
+    (OnApplyLeave res)
+
+  )
+  ;; (POST "http://localhost/T5PWebAPI/api/empleave" {:handler OnApplyLeave
+  ;;                                           :error-handler error-handler
+  ;;                                           :headers {:content-type "application/json" 
+  ;;                                                     :Authorization (str "Bearer "  (:token  (first (:token @t5pcore/app-state))))
+  ;;                                           }
+  ;;                                           :format :json
+  ;;                                           :params (:leaveapp @app-state)
+  ;;                                           })
 )
 
 
@@ -194,6 +238,52 @@
 
 (def custom-formatter3 (tf/formatter "yyyy/MM/dd"))
 
+
+(defn OnCalcLeave [response]
+  (let [     
+      newdata {:leavedays (get response "leavedays") :leavehours (get response "leavehours") }
+    ]
+
+    (swap! app-state assoc-in [:leaveapp :leavedays] 
+      (:leavedays newdata)
+    ) 
+    (.log js/console (str  (:leavedays newdata) ))
+  )
+  
+  ;;(.log js/console (str  (get (first response)  "Title") ))
+)
+
+
+
+(defn calcleave []
+  (.log js/console "Starting post leave calculation" ) 
+  (POST "http://localhost/T5PWebAPI/api/leavecalc" {
+                                                    :handler OnCalcLeave
+                                                    :error-handler error-handler
+                                                    :headers {
+                                                              :content-type "application/json"
+                                                              :Authorization (str "Bearer "  (:token  (first (:token @t5pcore/app-state)))) }
+                                                    :format :json
+                                                    :params (:leaveapp @app-state)
+                                                    }    
+   
+   )
+)
+
+(defn IsCheckLeave? []
+  (and ( = (nil? (:leavefromdate (:leaveapp @app-state)))  false)
+       ( = (nil? (:leavetodate (:leaveapp @app-state)))  false)
+       ( = (nil? (:leavecode (:leaveapp @app-state)))  false)
+  )
+)
+
+(defn CheckCalcLeave []
+  (if (= (IsCheckLeave?)  true)
+    (calcleave) 
+    (.log js/console (str  (:leavefromdate (:leaveapp @app-state))) )
+  )  
+)
+
 (defn setdatepicker [field]
   (let [custom-formatter2  (tf/formatter (:datemask (:User @t5pcore/app-state)) )] 
 
@@ -214,7 +304,7 @@
                   ;dtstring (tf/parse custom-formatter1 (subs (str (.. e -date)  )  4 24)  )
                   dtstring (if
                     (= (count (.. e -dates) ) 0)
-                      (tf/parse custom-formatter1 "May 26 2016 08:00:00"  )
+                      nil ;(tf/parse custom-formatter1 "May 26 2016 08:00:00"  )
                       (tf/parse custom-formatter1 (subs (str (.. e -date)  )  4 24)  )
                   )
 
@@ -225,8 +315,14 @@
                ;;(.log js/console (str (.. e -date)  ) )
                ;(.log js/console (count (.. e -dates)))
                ;(.log js/console (subs (str (.. e -date)  ) 4 24))
-               (.log js/console (tf/unparse custom-formatter2 dtstring))
-               (swap! app-state assoc-in [:leaveapp (keyword (.. e -target -id))] (tf/unparse custom-formatter2 dtstring)) 
+                 (
+                   if (= dtstring nil) "nil"
+                   (
+                     ;(.log js/console (tf/unparse custom-formatter2 dtstring))
+                     (swap! app-state assoc-in [:leaveapp (keyword (.. e -target -id))] (tf/unparse custom-formatter2 dtstring))
+                     (CheckCalcLeave)
+                   )
+                 )
                )
              )
            )
@@ -389,44 +485,6 @@
   
 )
 
-(defn OnCalcLeave [response]
-  (let [     
-      newdata {:leavedays (get response "leavedays") :leavehours (get response "leavehours") }
-    ]
-
-    (swap! app-state assoc-in [:leaveapp :leavedays] 
-      (:leavedays newdata)
-    ) 
-    (.log js/console (str  (:leavedays newdata) ))
-  )
-  
-  ;;(.log js/console (str  (get (first response)  "Title") ))
-)
-
-
-(defn calcleave []
-  (POST "http://localhost/T5PWebAPI/api/leavecalc" {:handler OnCalcLeave
-                                            :error-handler error-handler
-                                            :headers {
-                                              :content-type "application/json"
-                                              :Authorization (str "Bearer "  (:token  (first (:token @t5pcore/app-state)))) }
-                                            :format :json
-                                            :params (:leaveapp @app-state)
-                                            })
-)
-
-
-(defn CheckCalcLeave []
-  (if (=  
-      (and ( = (nil? (:leavefromdate (:leaveapp @app-state)))  false)
-           ( = (nil? (:leavetodate (:leaveapp @app-state)))  false)
-           ( = (nil? (:leavecode (:leaveapp @app-state)))  false)
-      ) true 
-    )
-    calcleave
-  )
-  
-)
 
 (defn desplayComboboxField [text]
   (dom/div {:className "col-sm-10"}
@@ -453,6 +511,40 @@
 
 )
 
+(defn addModal []
+   (dom/div
+
+   ;(b/button {:type "button" :className "btn btn-info btn-lg" :data-toggle "modal" :data-target "#myModal"} "Open Modal")
+           (dom/div {:id "leaveModal" :className "modal fade" :role "dialog"}
+                    (dom/div {:className "modal-dialog"} 
+                             ;;Modal content
+                             (dom/div {:className "modal-content"} 
+                                      (dom/div {:className "modal-header"} 
+                                               (b/button {:type "button" :className "close" :data-dismiss "modal"})
+                                               (dom/h4 {:className "modal-title"} (:modalTitle @app-state) )
+                                               )
+                                      (dom/div {:className "modal-body"}
+                                               (dom/p (:modalText @app-state))
+                                               )
+                                      (dom/div {:className "modal-footer"}
+                                               (b/button {:type "button" :className "btn btn-default" :data-dismiss "modal"} "Close")
+                                               )
+                                      )
+                             )
+                    )
+            
+           (dom/div
+
+            ( b/button {:bs-style "primary"
+                        :onClick (fn [e](applyLeave))
+                        :disabled? (not= (IsCheckLeave?)  true)  } "Submit")
+            )   
+   )
+
+)
+
+
+
 (defcomponent leave-page-view [data owner]
   (did-mount [_]
     (onMount data)
@@ -463,8 +555,10 @@
   )
   (render [_]
     (dom/div
-     (om/build t5pcore/website-view nil {})
-      (p/panel (merge {:header (dom/h3 "休假申请" )} {:bs-style "primary" :text-align "center"}  {:footer  ( b/button {:bs-style "primary" :onClick (fn [e](calcleave))} "Submit")}  )
+      (om/build t5pcore/website-view nil {})
+
+      (p/panel (merge {:header (dom/h3 "休假申请" )} {:bs-style "primary" :text-align "center"}  
+        {:footer (addModal)}  )
 
         (dom/div {:className "panel-body"}
           (dom/form {:className "form-horizontal"}
