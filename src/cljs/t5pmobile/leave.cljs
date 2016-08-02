@@ -310,6 +310,11 @@
   )  
 )
 
+(defn setNewLeaveAppValue [key val]
+  (swap! app-state assoc-in [:leaveapp (keyword key)] val)
+  (CheckCalcLeave)
+)
+
 (defn setdatepicker [field]
   (let [custom-formatter2  (tf/formatter (:datemask (:User @t5pcore/app-state)) )] 
 
@@ -326,7 +331,7 @@
            (.on "show"
              (fn [e] (
                 let [
-                  ;;dt (js/Date (.. e -date))
+                  dt (js/Date (.. e -date))
                   ;dtstring (tf/parse custom-formatter1 (subs (str (.. e -date)  )  4 24)  )
                   dtstring (if
                     (= (count (.. e -dates) ) 0)
@@ -337,17 +342,31 @@
 
                 ]
                 ;;(swap! app-state assoc-in [:leavetypes :ivyt03 :fields :leavefromdate :value] (str (subs dt 8 10)  "/05/"    (subs dt 11 16)  ) )
-               ;;(.log js/console dt) 
+              
                ;;(.log js/console (str (.. e -date)  ) )
                ;(.log js/console (count (.. e -dates)))
                ;(.log js/console (subs (str (.. e -date)  ) 4 24))
                  (
                    if (= dtstring nil) "nil"
                    (
-                     ;(.log js/console (tf/unparse custom-formatter2 dtstring))
-                     (swap! app-state assoc-in [:leaveapp (keyword (.. e -target -id))] (tf/unparse custom-formatter2 dtstring))
-                     (CheckCalcLeave)
-                   )
+                    ;;.log js/console (keyword (.. e -target -id)) 
+                    if (not= 
+                                        ;( (keyword (.. e -target -id)) (:leaveapp @app-state)  )  
+                        ( (keyword (.. e -target -id)) (:leaveapp @app-state))
+                        (tf/unparse custom-formatter2 dtstring)
+                       
+                        )
+                    (
+                      setNewLeaveAppValue (.. e -target -id) (tf/unparse custom-formatter2 dtstring)
+;;  (swap! app-state assoc-in [:leaveapp (keyword (.. e -target -id))] (tf/unparse custom-formatter2 dtstring))
+;;  (CheckCalcLeave)      
+                                      
+                    
+                    )
+                     
+                    
+                                        ;(.log js/console (tf/unparse custom-formatter2 dtstring))
+                    )
                  )
                )
              )
