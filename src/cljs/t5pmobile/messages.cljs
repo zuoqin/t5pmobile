@@ -121,14 +121,15 @@
     (dom/div {:className "list-group" :style {:display "block"}}
       (map (fn [item]
         (dom/span
-          (dom/a {:className "list-group-item"}
+          (dom/a {:className "list-group-item" :href (str  "#/applicationdetail/" (get item "forminstanceid") )}
             (dom/h4 {:className "list-group-item-heading"} 
               (dom/span {:className "label label-success"} (str "#" (get item "forminstanceid")))  
               (str " - " (get item "leavetype") " - "   (get item "applicantname") )
             )
             (dom/p {:className "paddingleft2"} (str "提交 "(get item "submittime")) )
             (dom/p {:className "list-group-item-text paddingleft2"}
-              (str "开始日期: " (get item "leavefromdate") " 结束日期:   "   (get item "leavetodate") ", "   (get item "leavedays")  " 天") )
+              (str "开始日期: " (get item "leavefromdate") " 结束日期:   "   (get item "leavetodate") ", "   (get item "leavedays")  " 天") 
+            )
           ) 
         )               
         )(:myapplications data)
@@ -144,7 +145,7 @@
     (dom/div {:className "list-group" :style {:display "block"}}
       (map (fn [item]
         (dom/span
-          (dom/a {:className "list-group-item"}
+          (dom/a {:className "list-group-item" :href (str  "#/msgdetail/" (get item "messageid") ) }
             (dom/h4 {:className "list-group-item-heading"} (get item "subject"))
             (dom/h6 {:className "paddingleft2"} (get item "senddate"))
             (dom/p {:className "list-group-item-text paddingleft2"} (get item "body"))

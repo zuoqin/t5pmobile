@@ -33,7 +33,7 @@
 (defn OnGetEmployee [response]
   (
     let [     
-      newdata {:EmpName (get (get response "Emphr") "EmpName") :Roster (get response "RosterList")  }
+      newdata {:empid (get (get response "Emphr") "empid")  :EmpName (get (get response "Emphr") "EmpName") :Roster (get response "RosterList")  }
     ]
     (swap! t5pcore/app-state assoc-in [:Employee] newdata )
   )
@@ -113,8 +113,8 @@
       ;(dom/h1 "Login Page")
        (dom/img {:src "images/LogonBack.jpg" :className "img-responsive company-logo-logon"})
       (dom/form {:className "form-signin"}
-        (dom/input #js {:type "text" :ref "txtUserName" :value "sunny" :className "form-control" :placeholder "User Name"})
-        (dom/input {:className "form-control" :ref "txtPassword" :value "1016" :id "txtPassword"  :placeholder "Password"})
+        (dom/input #js {:type "text" :ref "txtUserName" :value "mary" :className "form-control" :placeholder "User Name"})
+        (dom/input {:className "form-control" :ref "txtPassword" :value "" :id "txtPassword"  :placeholder "Password"})
         (dom/button #js {:className "btn btn-lg btn-primary btn-block" :type "button" :onClick (fn [e](checklogin owner))} "Login")
       )
     )
