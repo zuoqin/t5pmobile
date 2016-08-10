@@ -7,6 +7,7 @@
             [goog.events :as events]
             [goog.history.EventType :as EventType]
             [ajax.core :refer [GET POST]]
+            [t5pmobile.settings :as settings]
   )
   (:import goog.History)
 )
@@ -55,16 +56,20 @@
   ;(swap! t5pcore/app-state assoc-in [:messages] (conj (:messages data) {:showmessages 0}) )
   ;(swap! t5pcore/app-state  assoc-in [:messages] {:showmessages 0} )
  
-  (GET "http://localhost/T5PWebAPI/api/messages" {:handler OnGetMessages
-                                            :error-handler error-handler
-                                            :headers {:content-type "application/json" :Authorization (str "Bearer "  (:token  (first (:token @t5pcore/app-state)))) }
-                                            })
+  (GET (str settings/apipath "api/messages") {
+    :handler OnGetMessages
+    :error-handler error-handler
+    :headers {
+      :content-type "application/json"
+      :Authorization (str "Bearer "  (:token  (first (:token @t5pcore/app-state)))) }
+  })
 )
 
 
 (defn getMessagesPage [event]
   (let [
-      url (str "http://localhost/T5PWebAPI/api/messages/messages?empid=" "10289&page=" (+ 1 (:page @app-state)) )
+      url (str settings/apipath "api/messages/messages?empid=" 
+       (:empid (:Employee @t5pcore/app-state)) "&page=" (+ 1 (:page @app-state)) )
     ]
    (.stopPropagation event)
    (swap! app-state assoc :page  (+ (:page @app-state) 1)   )

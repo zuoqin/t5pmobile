@@ -101,29 +101,25 @@
 )
 
 
-(sec/defroute index-page "/" []
-  (om/root index-page-view
-           app-state
-           {:target (. js/document (getElementById "app"))}))
+;; (sec/defroute index-page "/" []
+;;   (om/root index-page-view
+;;            app-state
+;;            {:target (. js/document (getElementById "app"))}))
 
 
 
-(defn root-component [app owner]
-  (reify
-    om/IRender
-    (render [_]
-      (dom/div nil (dom/h1 nil (:text app)))
-      ;(om/build website-view app )
-    )
-  )
-)
 
 (defn main []
   (-> js/document
       .-location
-      (set! "#/")))
+      (set! "#/"))
 
-(main)
+  (aset js/window "location" "#/login")
+)
+  
+;(main)
+
+
 
 
 

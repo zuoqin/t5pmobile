@@ -7,7 +7,7 @@
             [goog.history.EventType :as EventType]
             [t5pmobile.core :as t5pcore]
             [ajax.core :refer [GET POST]]
-            
+            [t5pmobile.settings :as settings]
   )
   (:import goog.History)
 )
@@ -34,7 +34,7 @@
           (dom/tbody
             (dom/tr
               (dom/td #js {:rowSpan "3" :className "portrait"}
-                (dom/img {:src "http://localhost/T5PWebAPI/Content/Portrait/charles.jpg" :className "img-rounded portrait"})
+                (dom/img {:src (str settings/apipath  "Content/Portrait/charles.jpg") :className "img-rounded portrait"})
               )
               (dom/td {:className "tdtable"} (:EmpName (:Employee data) ) 
               )

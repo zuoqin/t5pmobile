@@ -13,7 +13,8 @@
             [cljs.core.async :refer [put! dropping-buffer chan take! <!]]
             [om-bootstrap.input :as i]
             [cljs-time.core :as tm]
-            [cljs-time.format :as tf]            
+            [cljs-time.format :as tf]
+            [t5pmobile.settings :as settings]
   )
   (:import goog.History)
 )
@@ -68,7 +69,7 @@
       (not= (:msgid @app-state) nil)
       (not= (:msgid @app-state) 0)
     )
-    (GET (str "http://localhost/T5PWebAPI/api/messages?messageid=" (:msgid @app-state) "&empid=" (:empid @app-state))
+    (GET (str settings/apipath "api/messages?messageid=" (:msgid @app-state) "&empid=" (:empid @app-state))
       {
         :handler OnGetMessage
         :error-handler OnError

@@ -5,32 +5,33 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
 
   :dependencies [[org.clojure/clojure "1.8.0"]
-                 [org.clojure/core.async "0.2.374"]
-                 [org.clojure/clojurescript "1.8.40" :scope "provided"]
+                 [org.clojure/clojurescript "1.9.89" :scope "provided"]
+                 [com.cognitect/transit-clj "0.8.285"]
                  [ring "1.4.0"]
                  [ring/ring-defaults "0.2.0"]
                  [bk/ring-gzip "0.1.1"]
                  [ring.middleware.logger "0.5.0"]
+                 [compojure "1.5.0"]
+                 [environ "1.0.3"]
+                 [org.omcljs/om "1.0.0-alpha36"]
                  [prismatic/schema "0.4.0"]
                  [prismatic/om-tools "0.3.12"]
-                 [secretary "1.2.1"]
-                 [compojure "1.5.0"]
-                 [environ "1.0.2"]
+                 [secretary "1.2.1"]                 
                  ;[bootstrap-cljs "0.28.1-0"]
                  [racehub/om-bootstrap "0.5.0"]
                  [org.omcljs/om "1.0.0-alpha31"]
                  [cljs-ajax "0.5.4"]
-                 [com.andrewmcveigh/cljs-time "0.4.0"]
+                 [com.andrewmcveigh/cljs-time "0.4.0"]           
                 ]
 
-  :plugins [[lein-cljsbuild "1.1.1"]
-            [lein-environ "1.0.1"]]
+  :plugins [[lein-cljsbuild "1.1.3"]
+            [lein-environ "1.0.3"]]
 
   :min-lein-version "2.6.1"
 
-  :source-paths ["src/clj" "src/cljs" "dev"]
+  :source-paths ["src/clj" "src/cljs" "src/cljc"]
 
-  :test-paths ["test/clj"]
+  :test-paths ["test/clj" "test/cljc"]
 
   :clean-targets ^{:protect false} [:target-path :compile-path "resources/public/js"]
 
@@ -45,19 +46,35 @@
   :repl-options {:init-ns user}
 
   :cljsbuild {:builds
-              {:app
-               {:source-paths ["src/cljs"]
+              [{:id "app"
+                :source-paths ["src/cljs" "src/cljc"]
 
                 :figwheel true
                 ;; Alternatively, you can configure a function to run every time figwheel reloads.
                 ;; :figwheel {:on-jsload "t5pmobile.core/on-figwheel-reload"}
 
                 :compiler {:main t5pmobile.core
-                           :optimizations :none
                            :asset-path "js/compiled/out"
                            :output-to "resources/public/js/compiled/t5pmobile.js"
                            :output-dir "resources/public/js/compiled/out"
-                           :source-map-timestamp true}}}}
+                           :source-map-timestamp true}}
+
+               {:id "test"
+                :source-paths ["src/cljs" "test/cljs" "src/cljc" "test/cljc"]
+                :compiler {:output-to "resources/public/js/compiled/testable.js"
+                           :main t5pmobile.test-runner
+                           :optimizations :none}}
+
+               {:id "min"
+                :source-paths ["src/cljs" "src/cljc"]
+                :jar true
+                :compiler {:main t5pmobile.core
+                           :output-to "resources/public/js/t5pmobile.js"
+                           :output-dir "resources/public/js/out"
+                           :asset-path "js/out"
+                           :source-map-timestamp true
+                           :optimizations :whitespace
+                           :pretty-print false}}]}
 
   ;; When running figwheel from nREPL, figwheel will read this configuration
   ;; stanza, but it will read it without passing through leiningen's profile
@@ -96,31 +113,20 @@
   :doo {:build "test"}
 
   :profiles {:dev
-             {:dependencies [[figwheel "0.5.2"]
-                             [figwheel-sidecar "0.5.2"]
+             {:dependencies [[figwheel "0.5.4-4"]
+                             [figwheel-sidecar "0.5.4-4"]
                              [com.cemerick/piggieback "0.2.1"]
-                             ;[domina "1.0.3"]
                              [org.clojure/tools.nrepl "0.2.12"]]
 
-              :plugins [[lein-figwheel "0.5.2"]
+              :plugins [[lein-figwheel "0.5.4-4"]
                         [lein-doo "0.1.6"]]
 
-              :cljsbuild {:builds
-                          {:test
-                           {:source-paths ["src/cljs" "test/cljs"]
-                            :compiler
-                            {:output-to "resources/public/js/compiled/testable.js"
-                             :main t5pmobile.test-runner
-                             :optimizations :none}}}}}
+              :source-paths ["dev"]
+              :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}}
 
              :uberjar
-             {:source-paths ^:replace ["src/clj"]
-              :hooks [leiningen.cljsbuild]
+             {:source-paths ^:replace ["src/clj" "src/cljc"]
+              :prep-tasks ["compile" ["cljsbuild" "once" "app"]]
+              :hooks []
               :omit-source true
-              :aot :all
-              :cljsbuild {:builds
-                          {:app
-                           {:source-paths ^:replace ["src/cljs"]
-                            :compiler
-                            {:optimizations :none
-                             :pretty-print true}}}}}})
+              :aot :all}})

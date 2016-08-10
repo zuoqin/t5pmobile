@@ -15,6 +15,7 @@
             [om-bootstrap.input :as i]
             [cljs-time.core :as tm]
             [cljs-time.format :as tf]
+            [t5pmobile.settings :as settings]
   )
   (:import goog.History)
 )
@@ -183,14 +184,14 @@
   ;;   (OnApplyLeave res)
 
   ;; )
-  (POST "http://localhost/T5PWebAPI/api/empleave" {:handler OnApplyLeaveSuccess
-                                            :error-handler OnApplyLeaveError
-                                            :headers {:content-type "application/json" 
-                                                      :Authorization (str "Bearer "  (:token  (first (:token @t5pcore/app-state))))
-                                            }
-                                            :format :json
-                                            :params (:leaveapp @app-state)
-                                            })
+  (POST (str settings/apipath  "api/empleave") {
+    :handler OnApplyLeaveSuccess
+    :error-handler OnApplyLeaveError
+    :headers {
+      :content-type "application/json" 
+      :Authorization (str "Bearer "  (:token  (first (:token @t5pcore/app-state))))}
+    :format :json
+    :params (:leaveapp @app-state)})
 )
 
 
@@ -199,10 +200,13 @@
  (.log js/console (str "token: " " " (:token  (first (:token @t5pcore/app-state)))       ))
 
  
-  (GET "http://localhost/T5PWebAPI/api/leavetype/leavetype2?type=0" {:handler OnGetLeaveTypes
-                                            :error-handler error-handler
-                                            :headers {:content-type "application/json" :Authorization (str "Bearer "  (:token  (first (:token @t5pcore/app-state)))) }
-                                            })
+  (GET (str settings/apipath "api/leavetype/leavetype2?type=0") {
+    :handler OnGetLeaveTypes
+    :error-handler error-handler
+    :headers {
+      :content-type "application/json"
+      :Authorization (str "Bearer "  (:token  (first (:token @t5pcore/app-state)))) }
+  })
 )
 
 
@@ -283,7 +287,7 @@
 
 (defn calcleave []
   (.log js/console "Starting post leave calculation" ) 
-  (POST "http://localhost/T5PWebAPI/api/leavecalc" {
+  (POST (str settings/apipath "api/leavecalc") {
     :handler OnCalcLeave
     :error-handler error-handler
     :headers {
@@ -349,24 +353,16 @@
                  (
                    if (= dtstring nil) "nil"
                    (
-                    ;;.log js/console (keyword (.. e -target -id)) 
-                    if (not= 
-                                        ;( (keyword (.. e -target -id)) (:leaveapp @app-state)  )  
-                        ( (keyword (.. e -target -id)) (:leaveapp @app-state))
-                        (tf/unparse custom-formatter2 dtstring)
-                       
-                        )
-                    (
-                      setNewLeaveAppValue (.. e -target -id) (tf/unparse custom-formatter2 dtstring)
-;;  (swap! app-state assoc-in [:leaveapp (keyword (.. e -target -id))] (tf/unparse custom-formatter2 dtstring))
-;;  (CheckCalcLeave)      
-                                      
-                    
-                    )
-                     
-                    
-                                        ;(.log js/console (tf/unparse custom-formatter2 dtstring))
-                    )
+                     if (not= 
+                                         ;( (keyword (.. e -target -id)) (:leaveapp @app-state)  )  
+                         ( (keyword (.. e -target -id)) (:leaveapp @app-state))
+                         (tf/unparse custom-formatter2 dtstring)
+
+                         )
+                     (
+                       setNewLeaveAppValue (.. e -target -id) (tf/unparse custom-formatter2 dtstring)
+                     )
+                   )
                  )
                )
              )

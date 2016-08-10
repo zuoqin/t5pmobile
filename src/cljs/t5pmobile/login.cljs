@@ -6,6 +6,7 @@
             [goog.events :as events]
             [goog.history.EventType :as EventType]
             [t5pmobile.core :as t5pcore]
+            [t5pmobile.settings :as settings]
             [ajax.core :refer [GET POST]]
             [om-bootstrap.input :as i]
             
@@ -40,14 +41,15 @@
 )
 
 (defn requser []
-  (GET "http://localhost/T5PWebAPI/api/user" {:handler OnGetUser
-                                            :error-handler error-handler
-                                            :headers {:content-type "application/json" :Authorization (str "Bearer "  (:token  (first (:token @t5pcore/app-state)))) }
-                                            })
+  (GET (str settings/apipath "api/user") {
+    :handler OnGetUser
+    :error-handler error-handler
+    :headers {:content-type "application/json" :Authorization (str "Bearer "  (:token  (first (:token @t5pcore/app-state)))) }
+  })
 )
 
 (defn reqemployee []
-  (GET "http://localhost/T5PWebAPI/api/employee" {:handler OnGetEmployee
+  (GET (str settings/apipath "api/employee") {:handler OnGetEmployee
                                             :error-handler error-handler
                                             :headers {:content-type "application/json" :Authorization (str "Bearer "  (:token  (first (:token @t5pcore/app-state)))) }
                                             })
@@ -71,7 +73,7 @@
     (swap! t5pcore/app-state assoc-in [:view] 1 )
     (reqemployee)
     (requser)
-    (aset js/window "location" "http://localhost:3449/#/home")
+    (aset js/window "location" "#/home")
 
   )
   
@@ -83,7 +85,7 @@
 )
 
 (defn dologin [username password]
-  (POST "http://localhost/T5PWebAPI/Token" {:handler OnLogin
+  (POST (str settings/apipath "Token") {:handler OnLogin
                                             :error-handler error-handler
                                             :headers {:content-type "application/x-www-form-urlencoded"}
                                             :body (str "grant_type=password&username=" username "&password=" password) 
@@ -105,16 +107,33 @@
   )
 )
 
+
+
+(defn loginForm [data owner]
+
+      (dom/img {:src "images/LogonBack.jpg" :className "img-responsive company-logo-logon"})
+      (dom/form {:className "form-signin"}
+        (dom/input #js {:type "text" :ref "txtUserName" :value "sunny" :className "form-control" :placeholder "User Name"})
+        (dom/input {:className "form-control" :ref "txtPassword" :value "1016" :id "txtPassword"  :placeholder "Password"})
+        (dom/button #js {:className "btn btn-lg btn-primary btn-block" :type "button" :onClick (fn [e](checklogin owner))} "Login")
+      )
+)
+
+
 (defcomponent login-page-view [data owner]
+  (did-update [this prev-props prev-state]
+    (.log js/console "jhkjhkjkjhkj" ) 
+    
+  )
   (render
     [_]
     (dom/div {:className "container"}
       ;(om/build t5pcore/website-view data {})
       ;(dom/h1 "Login Page")
-       (dom/img {:src "images/LogonBack.jpg" :className "img-responsive company-logo-logon"})
+      (dom/img {:src "images/LogonBack.jpg" :className "img-responsive company-logo-logon"})
       (dom/form {:className "form-signin"}
-        (dom/input #js {:type "text" :ref "txtUserName" :value "mary" :className "form-control" :placeholder "User Name"})
-        (dom/input {:className "form-control" :ref "txtPassword" :value "" :id "txtPassword"  :placeholder "Password"})
+        (dom/input #js {:type "text" :ref "txtUserName" :value "sunny" :className "form-control" :placeholder "User Name"})
+        (dom/input {:className "form-control" :ref "txtPassword" :value "1016" :id "txtPassword"  :placeholder "Password"})
         (dom/button #js {:className "btn btn-lg btn-primary btn-block" :type "button" :onClick (fn [e](checklogin owner))} "Login")
       )
     )
@@ -123,7 +142,47 @@
 
 
 
+(defmulti website-view
+  (
+    fn [data _]
+      (:view (if (= data nil) @t5pcore/app-state @data ))
+  )
+)
 
+(defmethod website-view 0
+  [data owner] 
+  (login-page-view data owner)
+)
+
+(defmethod website-view 1
+  [data owner] 
+  (login-page-view data owner)
+)
+
+(defn index-page-view [app owner]
+ (reify
+   om/IRender
+   (render
+     [_]
+      (dom/div
+        (om/build  loginForm  app {})
+        ;(dom/h1 "Index Page")
+      )
+    )
+  )
+)
+
+
+
+(sec/defroute index-page "/" []
+  (om/root index-page-view
+           t5pcore/app-state
+           {:target (. js/document (getElementById "app"))}))
+
+;; (sec/defroute index-page "/" []
+;;   (om/root login-page-view 
+;;            {}
+;;            {:target (. js/document (getElementById "app"))}))
 
 (sec/defroute login-page "/login" []
   (om/root login-page-view 
