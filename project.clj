@@ -68,7 +68,7 @@
                {:id "min"
                 :source-paths ["src/cljs" "src/cljc"]
                 :jar true
-                :compiler {:main t5pmobile.core
+                :compiler {:main t5pmobile.login
                            :output-to "resources/public/js/t5pmobile.js"
                            :output-dir "resources/public/js/out"
                            :asset-path "js/out"

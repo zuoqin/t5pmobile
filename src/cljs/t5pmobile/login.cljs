@@ -109,16 +109,6 @@
 
 
 
-(defn loginForm [data owner]
-
-      (dom/img {:src "images/LogonBack.jpg" :className "img-responsive company-logo-logon"})
-      (dom/form {:className "form-signin"}
-        (dom/input #js {:type "text" :ref "txtUserName" :value "sunny" :className "form-control" :placeholder "User Name"})
-        (dom/input {:className "form-control" :ref "txtPassword" :value "1016" :id "txtPassword"  :placeholder "Password"})
-        (dom/button #js {:className "btn btn-lg btn-primary btn-block" :type "button" :onClick (fn [e](checklogin owner))} "Login")
-      )
-)
-
 
 (defcomponent login-page-view [data owner]
   (did-update [this prev-props prev-state]
@@ -133,7 +123,7 @@
       (dom/img {:src "images/LogonBack.jpg" :className "img-responsive company-logo-logon"})
       (dom/form {:className "form-signin"}
         (dom/input #js {:type "text" :ref "txtUserName" :value "sunny" :className "form-control" :placeholder "User Name"})
-        (dom/input {:className "form-control" :ref "txtPassword" :value "1016" :id "txtPassword"  :placeholder "Password"})
+        (dom/input {:className "form-control" :ref "txtPassword" :id "txtPassword" :value "1016" :type "password"  :placeholder "Password"} )
         (dom/button #js {:className "btn btn-lg btn-primary btn-block" :type "button" :onClick (fn [e](checklogin owner))} "Login")
       )
     )
@@ -159,25 +149,25 @@
   (login-page-view data owner)
 )
 
-(defn index-page-view [app owner]
- (reify
-   om/IRender
-   (render
-     [_]
-      (dom/div
-        (om/build  loginForm  app {})
-        ;(dom/h1 "Index Page")
-      )
-    )
-  )
-)
+;; (defn index-page-view [app owner]
+;;  (reify
+;;    om/IRender
+;;    (render
+;;      [_]
+;;       (dom/div
+;;         (om/build  loginForm  app {})
+;;         ;(dom/h1 "Index Page")
+;;       )
+;;     )
+;;   )
+;; )
 
 
 
-(sec/defroute index-page "/" []
-  (om/root index-page-view
-           t5pcore/app-state
-           {:target (. js/document (getElementById "app"))}))
+;; (sec/defroute index-page "/" []
+;;   (om/root index-page-view
+;;            t5pcore/app-state
+;;            {:target (. js/document (getElementById "app"))}))
 
 ;; (sec/defroute index-page "/" []
 ;;   (om/root login-page-view 
@@ -188,6 +178,18 @@
   (om/root login-page-view 
            t5pcore/app-state
            {:target (. js/document (getElementById "app"))}))
+
+
+
+(defn main []
+  (-> js/document
+      .-location
+      (set! "#/"))
+
+  (aset js/window "location" "#/login")
+)
+  
+(main)
 
 
 
