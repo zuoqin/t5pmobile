@@ -232,6 +232,14 @@
   )
 )
 
+
+(defn CheckCalcLeave []
+  (if (= (IsCheckLeave?)  true)
+    (calcleave) 
+    (.log js/console (str  (:leavefromdate (:leaveapp @app-state))) )
+  )  
+)
+
 (defn handle-chkb-change [e]
   ;(.log js/console (.. e -target -id) )  
   ;(.log js/console "The change ....")
@@ -239,7 +247,8 @@
   (.stopImmediatePropagation (.. e -nativeEvent) )
   (swap! app-state assoc-in [:leaveapp (keyword  (.. e -currentTarget -id) )] 
     (if (= true (.. e -currentTarget -checked)  ) 1 0)
-  ) 
+  )
+  (CheckCalcLeave)
   ;(set! (.-checked (.. e -currentTarget)) false)
   ;(dominalib/remove-attr!  (.. e -currentTarget) :checked)
   ;;(dominalib/set-attr!  (.. e -currentTarget) :checked true)
@@ -307,12 +316,6 @@
   )
 )
 
-(defn CheckCalcLeave []
-  (if (= (IsCheckLeave?)  true)
-    (calcleave) 
-    (.log js/console (str  (:leavefromdate (:leaveapp @app-state))) )
-  )  
-)
 
 (defn setNewLeaveAppValue [key val]
   (swap! app-state assoc-in [:leaveapp (keyword key)] val)

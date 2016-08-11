@@ -13,5 +13,5 @@
 
 (enable-console-print!)
 
-(def apipath "http://testapi.t5p.hk/")
+(def apipath "http://api.t5p.hk/")
 

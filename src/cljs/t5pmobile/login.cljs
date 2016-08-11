@@ -122,8 +122,8 @@
       ;(dom/h1 "Login Page")
       (dom/img {:src "images/LogonBack.jpg" :className "img-responsive company-logo-logon"})
       (dom/form {:className "form-signin"}
-        (dom/input #js {:type "text" :ref "txtUserName" :value "sunny" :className "form-control" :placeholder "User Name"})
-        (dom/input {:className "form-control" :ref "txtPassword" :id "txtPassword" :value "1016" :type "password"  :placeholder "Password"} )
+        (dom/input #js {:type "text" :ref "txtUserName" :value "nacho" :className "form-control" :placeholder "User Name"} )
+        (dom/input {:className "form-control" :ref "txtPassword" :id "txtPassword" :value "12345" :type "password"  :placeholder "Password"} )
         (dom/button #js {:className "btn btn-lg btn-primary btn-block" :type "button" :onClick (fn [e](checklogin owner))} "Login")
       )
     )
@@ -184,9 +184,9 @@
 (defn main []
   (-> js/document
       .-location
-      (set! "#/"))
+      (set! "#/login"))
 
-  (aset js/window "location" "#/login")
+  ;(aset js/window "location" "#/login")
 )
   
 (main)

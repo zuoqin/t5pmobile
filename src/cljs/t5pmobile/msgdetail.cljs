@@ -110,10 +110,8 @@
             (dom/h5 "抄送: ")
             (dom/h5 (str "时间: "  (:sendtime @app-state)) )
           )
-
-          (dom/div {:className "panel-body"}
-            (:body @app-state)
-          )
+          (dom/div  #js {:className "panel-body" :dangerouslySetInnerHTML #js {:__html (:body @app-state)}} nil)
+          ;(dom/div {:className "panel-body"} (:body @app-state))
         )
       )
 

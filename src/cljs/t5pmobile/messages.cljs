@@ -143,6 +143,9 @@
   )
 )
 
+(defn setItemSubject [item]
+  (str "<span class=\"label label-success\">#" (get item "messageid")  "</span>" (get item "subject"))
+)
 
 (defcomponent showmessages-view [data owner]
   (render
@@ -151,9 +154,10 @@
       (map (fn [item]
         (dom/span
           (dom/a {:className "list-group-item" :href (str  "#/msgdetail/" (get item "messageid") ) }
-            (dom/h4 {:className "list-group-item-heading"} (get item "subject"))
+            (dom/h4  #js {:className "list-group-item-heading" :dangerouslySetInnerHTML #js {:__html (setItemSubject item)}} nil)
+            ;(dom/h4 {:className "list-group-item-heading"} (get item "subject"))
             (dom/h6 {:className "paddingleft2"} (get item "senddate"))
-            (dom/p {:className "list-group-item-text paddingleft2"} (get item "body"))
+            ;(dom/p  #js {:className "list-group-item-text paddingleft2" :dangerouslySetInnerHTML #js {:__html (get item "body")}} nil)
           ) 
         )                  
         )(:messages data)
