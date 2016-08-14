@@ -1,4 +1,4 @@
-(ns t5pmobile.login
+(ns t5pmobile.login  (:use [net.unit8.tower :only [t]])
   (:require [om.core :as om :include-macros true]
             [om-tools.dom :as dom :include-macros true]
             [om-tools.core :refer-macros [defcomponent]]
@@ -10,12 +10,39 @@
             [ajax.core :refer [GET POST]]
             [om-bootstrap.input :as i]
             
-            
+            [t5pmobile.home :as home]
+            [t5pmobile.leave :as leave]
+            [t5pmobile.messages :as messages]
+            [t5pmobile.msgdetail :as msgdetail]
+            [t5pmobile.applicationdetail :as applicationdetail]
   )
   (:import goog.History)
 )
 
 (enable-console-print!)
+
+
+(def my-tconfig
+  {:dev-mode? true
+   :fallback-locale :en
+   :dictionary
+   {:en         {:example {:foo         ":en :example/foo text"
+                           :foo_comment "Hello translator, please do x"
+                           :bar {:baz ":en :example.bar/baz text"}
+                           :greeting "Hello %s, how are you?"
+                           :inline-markdown "<tag>**strong**</tag>"
+                           :block-markdown* "<tag>**strong**</tag>"
+                           :with-exclaim!   "<tag>**strong**</tag>"
+                           :greeting-alias :example/greeting
+                           :baz-alias      :example.bar/baz}
+                 :missing  "<Missing translation: [%1$s %2$s %3$s]>"}
+    :en-US      {:example {:foo ":en-US :example/foo text"}}
+    :en-US-var1 {:example {:foo ":en-US-var1 :example/foo text"}}}})
+
+(t :en-US my-tconfig :example/foo)
+(t :en    my-tconfig :example/foo)
+(t :en    my-tconfig :example/greeting "Steve")
+
 
 
 
@@ -112,7 +139,7 @@
 
 (defcomponent login-page-view [data owner]
   (did-update [this prev-props prev-state]
-    (.log js/console "jhkjhkjkjhkj" ) 
+    (.log js/console "starting login screen" ) 
     
   )
   (render

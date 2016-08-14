@@ -21,7 +21,10 @@
                  [racehub/om-bootstrap "0.5.0"]
                  [org.omcljs/om "1.0.0-alpha31"]
                  [cljs-ajax "0.5.4"]
-                 [com.andrewmcveigh/cljs-time "0.4.0"]           
+                 [com.andrewmcveigh/cljs-time "0.4.0"]    
+
+                 [net.unit8/tower-cljs "0.1.0"]
+                 ;[com.taoensso/tower "3.1.0-beta4"] ;;internalization technique       
                 ]
 
   :plugins [[lein-cljsbuild "1.1.3"]
@@ -53,10 +56,10 @@
                 ;; Alternatively, you can configure a function to run every time figwheel reloads.
                 ;; :figwheel {:on-jsload "t5pmobile.core/on-figwheel-reload"}
 
-                :compiler {:main t5pmobile.core
-                           :asset-path "js/compiled/out"
-                           :output-to "resources/public/js/compiled/t5pmobile.js"
-                           :output-dir "resources/public/js/compiled/out"
+                :compiler {:main t5pmobile.login
+                           :asset-path "js/compiled1/out"
+                           :output-to "resources/public/js/compiled1/t5pmobile.js"
+                           :output-dir "resources/public/js/compiled1/out"
                            :source-map-timestamp true}}
 
                {:id "test"
@@ -69,11 +72,11 @@
                 :source-paths ["src/cljs" "src/cljc"]
                 :jar true
                 :compiler {:main t5pmobile.login
-                           :output-to "resources/public/js/t5pmobile.js"
-                           :output-dir "resources/public/js/out"
-                           :asset-path "js/out"
-                           :source-map-timestamp true
-                           :optimizations :whitespace
+                           :output-to "resources/public/js/compiled/t5pmobile.js"
+                           :output-dir "resources/public/js/compiled/out"
+                           :asset-path "js/compiled/out"
+                           :source-map-timestamp false
+                           :optimizations :advanced
                            :pretty-print false}}]}
 
   ;; When running figwheel from nREPL, figwheel will read this configuration
@@ -126,7 +129,7 @@
 
              :uberjar
              {:source-paths ^:replace ["src/clj" "src/cljc"]
-              :prep-tasks ["compile" ["cljsbuild" "once" "app"]]
+              :prep-tasks ["compile" ["cljsbuild" "once" "min"]]
               :hooks []
               :omit-source true
               :aot :all}})

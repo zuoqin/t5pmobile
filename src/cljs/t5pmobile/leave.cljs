@@ -233,6 +233,46 @@
 )
 
 
+(defn OnCalcLeave [response]
+  (let [     
+      newdata {:leavedays (get response "leavedays") :leavehours (get response "leavehours") }
+    ]
+
+    (swap! app-state assoc-in [:leaveapp :leavedays] 
+      (:leavedays newdata)
+    ) 
+    (.log js/console (str  (:leavedays newdata) ))
+  )
+  
+  ;;(.log js/console (str  (get (first response)  "Title") ))
+)
+
+
+
+(defn calcleave []
+  (.log js/console "Starting post leave calculation" ) 
+  (POST (str settings/apipath "api/leavecalc") {
+    :handler OnCalcLeave
+    :error-handler error-handler
+    :headers {
+              :content-type "application/json"
+              :Authorization (str "Bearer "  (:token  (first (:token @t5pcore/app-state)))) }
+    :format :json
+    :params (:leaveapp @app-state)
+    }
+   
+  )
+)
+
+(defn IsCheckLeave? []
+  (and ( = (nil? (:leavefromdate (:leaveapp @app-state)))  false)
+       ( = (nil? (:leavetodate (:leaveapp @app-state)))  false)
+       ( = (nil? (:leavecode (:leaveapp @app-state)))  false)
+  )
+)
+
+
+
 (defn CheckCalcLeave []
   (if (= (IsCheckLeave?)  true)
     (calcleave) 
@@ -278,43 +318,6 @@
 (def custom-formatter3 (tf/formatter "yyyy/MM/dd"))
 
 
-(defn OnCalcLeave [response]
-  (let [     
-      newdata {:leavedays (get response "leavedays") :leavehours (get response "leavehours") }
-    ]
-
-    (swap! app-state assoc-in [:leaveapp :leavedays] 
-      (:leavedays newdata)
-    ) 
-    (.log js/console (str  (:leavedays newdata) ))
-  )
-  
-  ;;(.log js/console (str  (get (first response)  "Title") ))
-)
-
-
-
-(defn calcleave []
-  (.log js/console "Starting post leave calculation" ) 
-  (POST (str settings/apipath "api/leavecalc") {
-    :handler OnCalcLeave
-    :error-handler error-handler
-    :headers {
-              :content-type "application/json"
-              :Authorization (str "Bearer "  (:token  (first (:token @t5pcore/app-state)))) }
-    :format :json
-    :params (:leaveapp @app-state)
-    }
-   
-  )
-)
-
-(defn IsCheckLeave? []
-  (and ( = (nil? (:leavefromdate (:leaveapp @app-state)))  false)
-       ( = (nil? (:leavetodate (:leaveapp @app-state)))  false)
-       ( = (nil? (:leavecode (:leaveapp @app-state)))  false)
-  )
-)
 
 
 (defn setNewLeaveAppValue [key val]
