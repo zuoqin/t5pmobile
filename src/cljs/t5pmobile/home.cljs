@@ -1,4 +1,4 @@
-(ns t5pmobile.home
+(ns t5pmobile.home (:use [net.unit8.tower :only [t]])
   (:require [om.core :as om :include-macros true]
             [om-tools.dom :as dom :include-macros true]
             [om-tools.core :refer-macros [defcomponent]]
@@ -20,8 +20,18 @@
 
 
 
+(defn onMount [data]
+  ;(getLeaveTypes data)
+  (swap! t5pcore/app-state assoc-in [:current] 
+       (t (t5pcore/numtolang  (:language (:User @t5pcore/app-state))) t5pcore/my-tconfig :mainmenu/home)
+  ) 
+)
+
 
 (defcomponent home-page-view [data owner]
+  (did-mount [_]
+    (onMount data)
+  )
   (render
     [_]
     (let [style {:style {:margin "10px" :padding-bottom "0px"}}

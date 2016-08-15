@@ -97,7 +97,7 @@
   (render
    [_]
    (dom/div
-    (om/build t5pcore/navigation-view {})
+    (om/build t5pcore/navigation-view data {})
     (dom/div {:id "message-detail-container"}
       (dom/span
         (dom/div {:className "panel panel-default" :id "divMsgInfo"}

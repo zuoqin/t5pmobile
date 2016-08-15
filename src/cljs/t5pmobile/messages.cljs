@@ -1,4 +1,4 @@
-(ns t5pmobile.messages
+(ns t5pmobile.messages (:use [net.unit8.tower :only [t]])
   (:require [om.core :as om :include-macros true]
             [om-tools.dom :as dom :include-macros true]
             [om-tools.core :refer-macros [defcomponent]]
@@ -206,6 +206,9 @@
 
 (defn onMount [data]
   (getMessages data)
+  (swap! t5pcore/app-state assoc-in [:current] 
+    (t (t5pcore/numtolang  (:language (:User @t5pcore/app-state))) t5pcore/my-tconfig :mainmenu/messages)
+  )
 )
 
 
@@ -214,54 +217,59 @@
     (onMount data)
   )
   (render [_]
-   (dom/div
-     (om/build t5pcore/website-view nil {})
-     ;(om/build t5pcore/website-view t5pcore/app-state {})
-     (dom/div #js {:className "panel panel-primary" :onClick (fn [e](displaymessages e))}
-       (dom/div {:className "panel-heading"}
-         (dom/div {:className "row"}
-           (dom/div {:className "col-md-10"}
-             (dom/span {:style {:float "left"} :className "glyphicon glyphicon-chevron-down"})
-             (dom/span {:style {:padding-left "5px"}} "我的消息")
-           )
-           (dom/div {:className "col-md-2"}
-             (dom/span {:className "badge" :style {:float "right" }} (str (:msgcount data))  )
-           )
+    (let [style {:style {:margin "10px;" :padding-bottom "0px;"}}
+      styleprimary {:style {:margin-top "70px"}}
+      ]
+      (dom/div
+        (om/build t5pcore/website-view t5pcore/app-state {})
+        ;(om/build t5pcore/website-view t5pcore/app-state {})
+        (dom/div  (assoc styleprimary  :className "panel panel-primary" :onClick (fn [e](displaymessages e)))
+          (dom/div {:className "panel-heading"}
+            (dom/div {:className "row"}
+              (dom/div {:className "col-md-10"}
+                (dom/span {:style {:float "left"} :className "glyphicon glyphicon-chevron-down"})
+                (dom/span {:style {:padding-left "5px"}} "我的消息")
+              )
+              (dom/div {:className "col-md-2"}
+                (dom/span {:className "badge" :style {:float "right" }} (str (:msgcount data))  )
+              )
+            )
+          )
+          (om/build mymessages-view  data {})
+        )
+
+
+        (dom/div {:className "panel panel-primary"  :onClick (fn [e](displayapplications e))}
+          (dom/div {:className "panel-heading"}
+            (dom/div {:className "row"}
+              (dom/div {:className "col-md-10"}
+                (dom/span {:style {:float "left"} :className "glyphicon glyphicon-chevron-down"})
+                (dom/span {:style {:padding-left "5px"}} "我的申请")
+              )
+              (dom/div {:className "col-md-2"}
+                (dom/span {:className "badge" :style {:float "right" }} (str (:myappcount data))  ))
+
+             )
+          )
+          (om/build myapplications-view  data {})
+        )
+
+
+        (dom/div {:className "panel panel-primary"}
+          (dom/div {:className "panel-heading"}
+            (dom/div {:className "row"}
+              (dom/div {:className "col-md-10"}
+                (dom/span {:style {:float "left"} :className "glyphicon glyphicon-chevron-down"})
+                (dom/span {:style {:padding-left "5px"}} "我的审批")
+              )
+              (dom/div {:className "col-md-2"}
+                (dom/span {:className "badge" :style {:float "right" }} (str (:pendingapps data))  ))
+
+             )
+          )
          )
-       )
-       (om/build mymessages-view  data {})
-     )
 
-
-     (dom/div {:className "panel panel-primary"  :onClick (fn [e](displayapplications e))}
-       (dom/div {:className "panel-heading"}
-         (dom/div {:className "row"}
-           (dom/div {:className "col-md-10"}
-             (dom/span {:style {:float "left"} :className "glyphicon glyphicon-chevron-down"})
-             (dom/span {:style {:padding-left "5px"}} "我的申请")
-           )
-           (dom/div {:className "col-md-2"}
-             (dom/span {:className "badge" :style {:float "right" }} (str (:myappcount data))  ))
-
-          )
-       )
-       (om/build myapplications-view  data {})
-     )
-
-
-     (dom/div {:className "panel panel-primary"}
-       (dom/div {:className "panel-heading"}
-         (dom/div {:className "row"}
-           (dom/div {:className "col-md-10"}
-             (dom/span {:style {:float "left"} :className "glyphicon glyphicon-chevron-down"})
-             (dom/span {:style {:padding-left "5px"}} "我的审批")
-           )
-           (dom/div {:className "col-md-2"}
-             (dom/span {:className "badge" :style {:float "right" }} (str (:pendingapps data))  ))
-
-          )
-       )
-      )
+      ) 
 
 
     )

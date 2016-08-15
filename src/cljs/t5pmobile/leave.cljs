@@ -1,4 +1,4 @@
-(ns t5pmobile.leave
+(ns t5pmobile.leave  (:use [net.unit8.tower :only [t]])
   (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [om.core :as om :include-macros true]
             [om-tools.dom :as dom :include-macros true]
@@ -24,7 +24,7 @@
 (def ch (chan (dropping-buffer 2)))
 (enable-console-print!)
 (def jquery (js* "$"))
-(defonce app-state (atom  {:modalText "THis the MOdal text" :modalTitle "This is the Modal Title"  :view 0 :leavecode "" :leavetypes [] :leaveapp {:leavecode "请选择"} } )) ;; :leavedays 0 :leavehours 0
+(defonce app-state (atom  {:modalText "THis the MOdal text" :modalTitle "This is the Modal Title"  :view 1 :leavecode "" :leavetypes [] :leaveapp {:leavecode "请选择"} } )) ;; :leavedays 0 :leavehours 0
 
 
 
@@ -74,8 +74,8 @@
   ]
      
      
-     (swap! app-state assoc :leavetypes  (into {} newdata) )
-     (swap! app-state assoc :leavecodes leavecodes) 
+     (swap! app-state assoc-in [:leavetypes]   (into {} newdata) )
+     (swap! app-state assoc-in [:leavecodes]  leavecodes) 
   )
    
 
@@ -91,8 +91,8 @@
   ]
      
      
-     (swap! app-state assoc :leavetypes  (into {} newdata) )
-     (swap! app-state assoc :leavecodes leavecodes) 
+     (swap! app-state assoc-in [:leavetypes]   (into {} newdata) )
+     (swap! app-state assoc-in [:leavecodes]  leavecodes) 
   )
    
 
@@ -222,6 +222,9 @@
 
 
 (defn onMount [data]
+  (swap! app-state assoc-in [:current] 
+       (t (t5pcore/numtolang  (:language (:User @t5pcore/app-state))) t5pcore/my-tconfig :mainmenu/leave)
+  )
   (getLeaveTypes data)
   (jquery
    (fn []
@@ -597,13 +600,12 @@
     (onMount data)
   )
   (did-update [this prev-props prev-state]
-    
+    ;(.log js/console "Here hould be put!!!!") 
     (put! ch 42)
   )
   (render [_]
     (dom/div
-      (om/build t5pcore/website-view nil {})
-
+      (om/build t5pcore/website-view data {})
       (p/panel (merge {:header (dom/h3 "休假申请" )} {:bs-style "primary" :text-align "center"}  
         {:footer (addModal)}  )
 
@@ -671,7 +673,8 @@
           )
         )
       
-      )    
+      )  
+  
     )
   )
 )

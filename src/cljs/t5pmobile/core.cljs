@@ -6,10 +6,6 @@
             [goog.events :as events]
             [goog.history.EventType :as EventType]
             [ajax.core :refer [GET POST]]
-           
-            
-            ;[taoensso.tower :as tower :refer-macros (with-tscope)] ;;internalization technique
-            
   )
   (:import goog.History)
 )
@@ -22,26 +18,51 @@
 
 (def my-tconfig
   {:dev-mode? true
-   :fallback-locale :en
-   :dictionary
-   {:en         {:example {:foo         ":en :example/foo text"
-                           :foo_comment "Hello translator, please do x"
-                           :bar {:baz ":en :example.bar/baz text"}
-                           :greeting "Hello %s, how are you?"
-                           :inline-markdown "<tag>**strong**</tag>"
-                           :block-markdown* "<tag>**strong**</tag>"
-                           :with-exclaim!   "<tag>**strong**</tag>"
-                           :greeting-alias :example/greeting
-                           :baz-alias      :example.bar/baz}
-                 :missing  "<Missing translation: [%1$s %2$s %3$s]>"}
-    :en-US      {:example {:foo ":en-US :example/foo text"}}
-    :en-US-var1 {:example {:foo ":en-US-var1 :example/foo text"}}}})
+    :fallback-locale :en
+    :dictionary{
+      :en{
+        :mainmenu{
+          :home "Home"
+          :messages "Messages"
+          :leave "Leave"
+          :payslip "Payslip"
+          :subordinate "Subordinate"
+          :settings "Settings"
+          :exit "Logout"
+        }
+        :missing  "<Missing translation: [%1$s %2$s %3$s]>"
+      }
+      :cn{
+        :mainmenu{
+          :home "首页"
+          :messages "我的消息"
+          :leave "休假"
+          :payslip "薪资单"
+          :subordinate "下属"
+          :settings "设置"
+          :exit "退出"
+        }
+      }
+    }
+  }
+)
 
 (t :en-US my-tconfig :example/foo)
 (t :en    my-tconfig :example/foo)
 (t :en    my-tconfig :example/greeting "Steve")
 
-
+(defn numtolang [num]
+  (let [res (case num
+      0  (keyword "en")
+      1  (keyword "cn")
+      2  (keyword "zh")
+      3  (keyword "jp")
+      (keyword "en")
+    )]
+    
+    res
+  )
+)
 
 
 
@@ -54,7 +75,7 @@
 
 
 
-(defcomponent navigation-view [_ _]
+(defcomponent navigation-view [data owner]
   (render [_]
     (let [style {:style {:margin "10px" :padding-bottom "0px"}}
       stylehome {:style {:margin-top "10px"} }
@@ -69,7 +90,7 @@
             (dom/span {:className "icon-bar"})
           )
           (dom/a  (assoc stylehome :className "navbar-brand")
-            (dom/span {:id "pageTitle"}  (:current @app-state))
+            (dom/span {:id "pageTitle"}  (:current @data))
           )
         )
         (dom/div {:className "collapse navbar-collapse navbar-ex1-collapse" :id "menu"}
@@ -77,33 +98,38 @@
             (dom/li
               (dom/a (assoc style :href "#/home")
                 (dom/span {:className "glyphicon glyphicon-home"})
-                     "Home")
+                  (t (numtolang  (:language (:User @app-state))) my-tconfig :mainmenu/home)
+                )
             )
 
             (dom/li
               (dom/a (assoc style :href "#/messages")
                 (dom/span {:className "glyphicon glyphicon-envelope"})
-                     "Messages")
+                  (t (numtolang  (:language (:User @app-state))) my-tconfig :mainmenu/messages)
+              )
             )
 
 
             (dom/li
               (dom/a (assoc style :href "#/leave")
                 (dom/span {:className "glyphicon glyphicon-list-alt"})
-                     "Leave")           
+                (t (numtolang  (:language (:User @app-state))) my-tconfig :mainmenu/leave)
+              )           
             )
 
             (dom/li
               (dom/a (assoc style :href "#/payslip") 
                 (dom/span {:className "glyphicon glyphicon-usd"})
-                     "Payslip")
+                (t (numtolang  (:language (:User @app-state))) my-tconfig :mainmenu/payslip)
+              )
             )
 
 
             (dom/li
               (dom/a (assoc style :href "#/subordinate")
                 (dom/span {:className "glyphicon glyphicon-th"})
-                     "Subordinate")
+                (t (numtolang  (:language (:User @app-state))) my-tconfig :mainmenu/subordinate)
+              )
             )
           )
          
@@ -111,12 +137,14 @@
             (dom/li
               (dom/a (assoc style :href "#/user")
                  (dom/span {:className "glyphicon glyphicon-cog"})
-                     "Settings")
+                 (t (numtolang  (:language (:User @app-state))) my-tconfig :mainmenu/settings)
+              )
             )         
             (dom/li
               (dom/a (assoc style :href "#/login") 
                 (dom/span {:className "glyphicon glyphicon-log-out"})
-                     "Logout")
+                (t (numtolang  (:language (:User @app-state))) my-tconfig :mainmenu/exit)
+              )
             )
           )
         )
@@ -152,11 +180,13 @@
 
 (defmethod website-view 0
   [data owner] 
+  ;(.log js/console "zero found in view")
   (logout-view data owner)
 )
 
 (defmethod website-view 1
   [data owner] 
+  ;(.log js/console "One is found in view")
   (navigation-view data owner)
 )
 
