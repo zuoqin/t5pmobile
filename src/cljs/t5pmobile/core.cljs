@@ -16,7 +16,7 @@
 
 (enable-console-print!)
 
-(defonce app-state (atom {:view 0}))
+(defonce app-state (atom {:view 0 :current "Home"}))
 
 
 
@@ -55,27 +55,73 @@
 
 
 (defcomponent navigation-view [_ _]
-  (render
-   [_]
-   (let [style {:style {:margin "10px;"}}]
-     (dom/div style
+  (render [_]
+    (let [style {:style {:margin "10px" :padding-bottom "0px"}}
+      stylehome {:style {:margin-top "10px"} }
+      ]
+      (dom/nav {:className "navbar navbar-default navbar-fixed-top" :role "navigation"}
+        (dom/div {:className "navbar-header"}
+          (dom/button {:type "button" :className "navbar-toggle"
+            :data-toggle "collapse" :data-target ".navbar-ex1-collapse"}
+            (dom/span {:className "sr-only"} "Toggle navigation")
+            (dom/span {:className "icon-bar"})
+            (dom/span {:className "icon-bar"})
+            (dom/span {:className "icon-bar"})
+          )
+          (dom/a  (assoc stylehome :className "navbar-brand")
+            (dom/span {:id "pageTitle"}  (:current @app-state))
+          )
+        )
+        (dom/div {:className "collapse navbar-collapse navbar-ex1-collapse" :id "menu"}
+          (dom/ul {:className "nav navbar-nav"}
+            (dom/li
               (dom/a (assoc style :href "#/home")
                 (dom/span {:className "glyphicon glyphicon-home"})
                      "Home")
+            )
+
+            (dom/li
               (dom/a (assoc style :href "#/messages")
                 (dom/span {:className "glyphicon glyphicon-envelope"})
                      "Messages")
+            )
+
+
+            (dom/li
               (dom/a (assoc style :href "#/leave")
                 (dom/span {:className "glyphicon glyphicon-list-alt"})
-                     "Leave")
+                     "Leave")           
+            )
+
+            (dom/li
               (dom/a (assoc style :href "#/payslip") 
                 (dom/span {:className "glyphicon glyphicon-usd"})
                      "Payslip")
+            )
+
+
+            (dom/li
               (dom/a (assoc style :href "#/subordinate")
                 (dom/span {:className "glyphicon glyphicon-th"})
                      "Subordinate")
+            )
+          )
+         
+          (dom/ul {:className "nav navbar-nav navbar-right"}
+            (dom/li
+              (dom/a (assoc style :href "#/user")
+                 (dom/span {:className "glyphicon glyphicon-cog"})
+                     "Settings")
+            )         
+            (dom/li
               (dom/a (assoc style :href "#/login") 
+                (dom/span {:className "glyphicon glyphicon-log-out"})
                      "Logout")
+            )
+          )
+        )
+
+              
       )
     )
   )

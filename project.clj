@@ -57,9 +57,9 @@
                 ;; :figwheel {:on-jsload "t5pmobile.core/on-figwheel-reload"}
 
                 :compiler {:main t5pmobile.login
-                           :asset-path "js/compiled1/out"
-                           :output-to "resources/public/js/compiled1/t5pmobile.js"
-                           :output-dir "resources/public/js/compiled1/out"
+                           :asset-path "js/compiled/out"
+                           :output-to "resources/public/js/compiled/t5pmobile.js"
+                           :output-dir "resources/public/js/compiled/out"
                            :source-map-timestamp true}}
 
                {:id "test"

@@ -24,74 +24,78 @@
 (defcomponent home-page-view [data owner]
   (render
     [_]
-    (dom/div
-      (om/build t5pcore/website-view data {})
-      (dom/div {:className "panel panel-primary"}
-        (dom/div {:className "panel-heading"}
-                   "基本信息" 
-        )
-        (dom/table {:className "table table-bordered"}
-          (dom/tbody
-            (dom/tr
-              (dom/td #js {:rowSpan "3" :className "portrait"}
-                (dom/img {:src (str settings/apipath  "Content/Portrait/charles.jpg") :className "img-rounded portrait"})
-              )
-              (dom/td {:className "tdtable"} (:EmpName (:Employee data) ) 
-              )
-            )
-            (dom/tr {:className "table_tr_background"}
-              (dom/td {:className "tdtable"} "总经理" )
-            )
-          )
-        )
-      )
-
-
-      (dom/div {:className "panel panel-primary"}
-        (dom/div {:className "panel-heading"}
-                   "年假" 
-        )
-        (dom/table {:className "table table-bordered"}
-          (dom/tbody
-            (dom/tr
-              (dom/td 
-                (dom/div {:style {:float "left" }} "全年共享受年假") 
-                (dom/div {:style {:float "right"}} "0 天")
-              )
-            )
-            (dom/tr {:className "table_tr_background"}
-              (dom/td 
-                (dom/div {:style {:float "left"}} "全年已用" )
-                (dom/div {:style {:float "right"}} "0 天" )
-              )
-            )
-            (dom/tr
-              (dom/td 
-                (dom/div {:style {:float "left"}} "余额" )
-                (dom/div {:style {:float "right"}} "0 天" )
-              )
-            )
-          )
-        )
-      )
-      (dom/div {:className "panel panel-primary"}
+    (let [style {:style {:margin "10px" :padding-bottom "0px"}}
+      styleprimary {:style {:margin-top "70px"}}
+      ]
+      (dom/div
+        (om/build t5pcore/website-view data {})
+        (dom/div (assoc styleprimary  :className "panel panel-primary")
           (dom/div {:className "panel-heading"}
-                     "排班" 
+                     "基本信息" 
           )
-          (dom/ul {:className "list-group"}
-            (map (fn [text]
-              (dom/div
-                (dom/li {:className "list-group-item"}
-                  (dom/span {:className "glyphicon glyphicon-time grey"})
-                  (get text "workdate")
+          (dom/table {:className "table table-bordered"}
+            (dom/tbody
+              (dom/tr
+                (dom/td #js {:rowSpan "3" :className "portrait"}
+                  (dom/img {:src (str settings/apipath  "Content/Portrait/charles.jpg") :className "img-rounded portrait"})
                 )
-                (dom/li {:className "list-group-item paddingleft3 table_tr_background gray"} "没有排班")
+                (dom/td {:className "tdtable"} (:EmpName (:Employee data) ) 
+                )
               )
-              ) (:Roster (:Employee data))
+              (dom/tr {:className "table_tr_background"}
+                (dom/td {:className "tdtable"} "总经理" )
+              )
             )
           )
-      )      
-    )
+        )
+
+
+        (dom/div {:className "panel panel-primary"}
+          (dom/div {:className "panel-heading"}
+                     "年假" 
+          )
+          (dom/table {:className "table table-bordered"}
+            (dom/tbody
+              (dom/tr
+                (dom/td 
+                  (dom/div {:style {:float "left" }} "全年共享受年假") 
+                  (dom/div {:style {:float "right"}} "0 天")
+                )
+              )
+              (dom/tr {:className "table_tr_background"}
+                (dom/td 
+                  (dom/div {:style {:float "left"}} "全年已用" )
+                  (dom/div {:style {:float "right"}} "0 天" )
+                )
+              )
+              (dom/tr
+                (dom/td 
+                  (dom/div {:style {:float "left"}} "余额" )
+                  (dom/div {:style {:float "right"}} "0 天" )
+                )
+              )
+            )
+          )
+        )
+        (dom/div {:className "panel panel-primary"}
+            (dom/div {:className "panel-heading"}
+                       "排班" 
+            )
+            (dom/ul {:className "list-group"}
+              (map (fn [text]
+                (dom/div
+                  (dom/li {:className "list-group-item"}
+                    (dom/span {:className "glyphicon glyphicon-time grey"})
+                    (get text "workdate")
+                  )
+                  (dom/li {:className "list-group-item paddingleft3 table_tr_background gray"} "没有排班")
+                )
+                ) (:Roster (:Employee data))
+              )
+            )
+        )      
+      )
+    ) 
   )
 )
 

@@ -15,6 +15,7 @@
             [t5pmobile.messages :as messages]
             [t5pmobile.msgdetail :as msgdetail]
             [t5pmobile.applicationdetail :as applicationdetail]
+            [t5pmobile.user :as user]
   )
   (:import goog.History)
 )
@@ -52,7 +53,8 @@
 (defn OnGetUser [response]
   (
     let [     
-      newdata {:userid (get response "userid") :datemask (get response "datemask") :timemask (get response "timemask") }
+      newdata {:userid (get response "userid") :datemask (get response "datemask") :timemask (get response "timemask")
+        :language (get response "language")}
     ]
     (swap! t5pcore/app-state assoc-in [:User] newdata )
   )
