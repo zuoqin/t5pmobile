@@ -79,6 +79,7 @@
                            :asset-path "js/compiled1/out"
                            :source-map-timestamp false
                            :optimizations :advanced
+                           :closure-warnings {:externs-validation :off}
                            :externs [
                              "cljsjs/common/bootstrap.ext.js"
                              "cljsjs/common/jquery-timepicker.ext.js"
