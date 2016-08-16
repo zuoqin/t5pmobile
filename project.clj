@@ -79,6 +79,12 @@
                            :asset-path "js/compiled1/out"
                            :source-map-timestamp false
                            :optimizations :advanced
+                           :externs [
+                             "resources/public/javascript/bootstrap.min.js"
+                             "resources/public/javascript/jquery.timepicker.min.js"
+                             "resources/public/javascript/bootstrap-datepicker.min.js"
+                             "resources/public/javascript/jquery-3.1.0.min.js"                             
+                           ]
                            :pretty-print false}}]}
 
   ;; When running figwheel from nREPL, figwheel will read this configuration
@@ -131,7 +137,7 @@
 
              :uberjar
              {:source-paths ^:replace ["src/clj" "src/cljc"]
-              :prep-tasks ["compile" ["cljsbuild" "once" "app"]]
+              :prep-tasks ["compile" ["cljsbuild" "once" "min"]]
               :hooks []
               :omit-source true
               :aot :all}})
