@@ -80,10 +80,10 @@
                            :source-map-timestamp false
                            :optimizations :advanced
                            :externs [
-                             "resources/public/javascript/bootstrap.min.js"
-                             "resources/public/javascript/jquery.timepicker.min.js"
+                             "cljsjs/common/bootstrap.ext.js"
+                             "cljsjs/common/jquery-timepicker.ext.js"
                              "resources/public/javascript/bootstrap-datepicker.min.js"
-                             "resources/public/javascript/jquery-3.1.0.min.js"                             
+                             "cljsjs/common/jquery.ext.js"
                            ]
                            :pretty-print false}}]}
 
