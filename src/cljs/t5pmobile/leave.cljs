@@ -523,7 +523,7 @@
 )
 
 
-(defn desplayComboboxField [text]
+(defn displayComboboxField [text]
   (dom/div {:className "col-sm-10"}
     (b/button-group
       {:id  (name (first text) ) }
@@ -626,9 +626,9 @@
                 (dom/div {:className "col-sm-10"}
                   (cond 
                     (= (:fieldtype (nth text 1)  )  0)
-                      (desplayComboboxField text)
+                      (displayComboboxField text)
                     (= (:fieldtype (nth text 1)  )  1)
-                      (dom/input {:data-provide "datepicker" :id (name (first text) ) :oninput #(handle-change %)})
+                      (dom/input {:type "text" :id (name (first text) ) :oninput #(handle-change %)})
                     (= (:fieldtype (nth text 1)  )  2)
                       (dom/input {:type "text" :id (name (first text) ) :onChange #(handle-change %)})
                     (= (:fieldtype (nth text 1)  )  3)
