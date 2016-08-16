@@ -1,0 +1,29 @@
+﻿CACHE MANIFEST
+# 1.2
+
+CACHE:
+/
+/js/compiled/t5pmobile.js
+/index.html
+
+fonts/glyphicons-halflings-regular.woff2
+fonts/glyphicons-halflings-regular.ttf
+fonts/glyphicons-halflings-regular.woff
+
+/css/bootstrap-theme.min.css
+/css/bootstrap-theme.min.css.map
+/css/bootstrap.min.css
+/css/bootstrap.min.css.map
+/css/jquery.timepicker.css
+/css/style.css
+
+
+/javascript/jquery-3.1.0.min.js
+/javascript/bootstrap.min.js
+/javascript/bootstrap-datepicker.min.js
+/javascript/jquery.timepicker.min.js
+
+/images/LogonBack.jpg
+
+NETWORK:
+*

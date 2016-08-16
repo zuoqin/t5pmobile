@@ -1,4 +1,4 @@
-(ns t5pmobile.applicationdetail
+(ns t5pmobile.applicationdetail  (:use [net.unit8.tower :only [t]])
   (:require [om.core :as om :include-macros true]
             [om-tools.dom :as dom :include-macros true]
             [om-tools.core :refer-macros [defcomponent]]
@@ -21,7 +21,7 @@
 (enable-console-print!)
 
 
-(defonce app-state (atom  {:forminstanceid 0} ))
+(defonce app-state (atom  {:forminstanceid 0  :current "My Application"} ))
 
 
 (defn array-to-string [element]
@@ -86,6 +86,9 @@
 
 
 (defn onMount [data]
+  (swap! app-state assoc-in [:current] 
+    (t (t5pcore/numtolang  (:language (:User @t5pcore/app-state))) t5pcore/my-tconfig :mainmenu/applicationdetail)
+  )
   (getApplicationDetail)
 )
 
@@ -94,45 +97,51 @@
     (onMount data)
   )
   (render
-   [_]
-   (dom/div
-    (om/build t5pcore/navigation-view {})
-    (dom/div {:id "leave-detail-container"}
-      (dom/div {:className "panel panel-default" :id "divMsgInfo"}
-        (dom/div {:className "panel-heading"}
-          (dom/h3 {:className "panel-title"}
-            (dom/span {:className "label label-success"} (str "#" (:forminstanceid @app-state)))
-            " - Sunny - 无薪假"
-          )
-          (dom/h5 "提交时间:2016/08/01 13:42:29")
-          (dom/dl {:className "dl-horizontal leaveRecipients"}
-            (dom/dt {:text-align "left"}
-              (dom/small "开始日期: ")
-            )
-            (dom/dd "2016/08/06")
+  [_]
+    (let [style {:style {:margin "10px;" :padding-bottom "0px;"}}
+      styleprimary {:style {:margin-top "70px"}}
+      ]
+      (dom/div
+        (om/build t5pcore/navigation-view data {})
+        (dom/div {:id "leave-detail-container"}
+          (dom/div (assoc styleprimary  :className "panel panel-default"  :id "divMsgInfo")
+            (dom/div {:className "panel-heading"}
+              (dom/h3 {:className "panel-title"}
+                (dom/span {:className "label label-success"} (str "#" (:forminstanceid @app-state)))
+                " - Sunny - 无薪假"
+              )
+              (dom/h5 "提交时间:2016/08/01 13:42:29")
+              (dom/dl {:className "dl-horizontal leaveRecipients"}
+                (dom/dt {:text-align "left"}
+                  (dom/small "开始日期: ")
+                )
+                (dom/dd "2016/08/06")
 
-            (dom/dt {:text-align "left"}
-              (dom/small "结束日期: : ")
-            )
-            (dom/dd "2016/08/08")
+                (dom/dt {:text-align "left"}
+                  (dom/small "结束日期: : ")
+                )
+                (dom/dd "2016/08/08")
 
-            (dom/dt {:text-align "left"}
-              (dom/small "天数 : ")
+                (dom/dt {:text-align "left"}
+                  (dom/small "天数 : ")
+                )
+                (dom/dd "1")
+              )
             )
-            (dom/dd "1")
+            (dom/div {:className "panel-body"})
           )
         )
+        (dom/nav {:className "navbar navbar-default" :role "navigation"}
+          (dom/div {:className "navbar-header"}
+            (b/button {:className "btn btn-success"} "取消")
+            (b/button {:className "btn btn-danger"} "删除")
+          )
+        )
+      )
+    )
 
-        (dom/div {:className "panel-body"})
-      )
-    )
-    (dom/nav {:className "navbar navbar-default" :role "navigation"}
-      (dom/div {:className "navbar-header"}
-        (b/button {:className "btn btn-success"} "取消")
-        (b/button {:className "btn btn-danger"} "删除")
-      )
-    )
-)))
+  )
+)
 
 
 

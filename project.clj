@@ -49,18 +49,7 @@
   :repl-options {:init-ns user}
 
   :cljsbuild {:builds
-              [{:id "app"
-                :source-paths ["src/cljs" "src/cljc"]
-
-                :figwheel true
-                ;; Alternatively, you can configure a function to run every time figwheel reloads.
-                ;; :figwheel {:on-jsload "t5pmobile.core/on-figwheel-reload"}
-
-                :compiler {:main t5pmobile.login
-                           :asset-path "js/compiled/out"
-                           :output-to "resources/public/js/compiled/t5pmobile.js"
-                           :output-dir "resources/public/js/compiled/out"
-                           :source-map-timestamp true}}
+              [
 
                {:id "test"
                 :source-paths ["src/cljs" "test/cljs" "src/cljc" "test/cljc"]

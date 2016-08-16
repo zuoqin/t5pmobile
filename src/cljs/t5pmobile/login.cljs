@@ -16,6 +16,7 @@
             [t5pmobile.msgdetail :as msgdetail]
             [t5pmobile.applicationdetail :as applicationdetail]
             [t5pmobile.user :as user]
+            [t5pmobile.subordinate :as subordinate]
   )
   (:import goog.History)
 )
@@ -151,8 +152,8 @@
       ;(dom/h1 "Login Page")
       (dom/img {:src "images/LogonBack.jpg" :className "img-responsive company-logo-logon"})
       (dom/form {:className "form-signin"}
-        (dom/input #js {:type "text" :ref "txtUserName" :value "nacho" :className "form-control" :placeholder "User Name"} )
-        (dom/input {:className "form-control" :ref "txtPassword" :id "txtPassword" :value "12345" :type "password"  :placeholder "Password"} )
+        (dom/input #js {:type "text" :ref "txtUserName" :value  settings/demouser  :className "form-control" :placeholder "User Name"} )
+        (dom/input {:className "form-control" :ref "txtPassword" :id "txtPassword" :value settings/demopassword :type "password"  :placeholder "Password"} )
         (dom/button #js {:className "btn btn-lg btn-primary btn-block" :type "button" :onClick (fn [e](checklogin owner))} "Login")
       )
     )

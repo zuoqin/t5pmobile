@@ -222,7 +222,6 @@
       ]
       (dom/div
         (om/build t5pcore/website-view t5pcore/app-state {})
-        ;(om/build t5pcore/website-view t5pcore/app-state {})
         (dom/div  (assoc styleprimary  :className "panel panel-primary" :onClick (fn [e](displaymessages e)))
           (dom/div {:className "panel-heading"}
             (dom/div {:className "row"}

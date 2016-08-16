@@ -1,4 +1,4 @@
-(ns t5pmobile.msgdetail
+(ns t5pmobile.msgdetail  (:use [net.unit8.tower :only [t]])
   (:require [om.core :as om :include-macros true]
             [om-tools.dom :as dom :include-macros true]
             [om-tools.core :refer-macros [defcomponent]]
@@ -22,7 +22,7 @@
 (enable-console-print!)
 
 
-(defonce app-state (atom  {:msgid 0} ))
+(defonce app-state (atom  {:msgid 0 :current "Message Details"} ))
 
 
 (defn array-to-string [element]
@@ -87,6 +87,9 @@
 
 
 (defn onMount [data]
+  (swap! app-state assoc-in [:current] 
+    (t (t5pcore/numtolang  (:language (:User @t5pcore/app-state))) t5pcore/my-tconfig :mainmenu/msgdetail)
+  )
   (getMessageDetail)
 )
 
@@ -95,33 +98,38 @@
     (onMount data)
   )
   (render
-   [_]
-   (dom/div
-    (om/build t5pcore/navigation-view data {})
-    (dom/div {:id "message-detail-container"}
-      (dom/span
-        (dom/div {:className "panel panel-default" :id "divMsgInfo"}
-          (dom/div {:className "panel-heading"}
-            (dom/h3 {:className "panel-title"} (:subject @app-state))
-            (dom/h5 "发件人: Jane")
-            (dom/h5 "收件人:: "
-              (dom/span (str (:to @app-state)))
+    [_]
+    (let [style {:style {:margin "10px;" :padding-bottom "0px;"}}
+      styleprimary {:style {:margin-top "70px"}}
+      ]
+      (dom/div
+        (om/build t5pcore/navigation-view data {})
+        (dom/div {:id "message-detail-container"}
+          (dom/span
+            (dom/div  (assoc styleprimary  :className "panel panel-default"  :id "divMsgInfo")
+              (dom/div {:className "panel-heading"}
+                (dom/h3 {:className "panel-title"} (:subject @app-state))
+                (dom/h5 "发件人: Jane")
+                (dom/h5 "收件人:: "
+                  (dom/span (str (:to @app-state)))
+                )
+                (dom/h5 "抄送: ")
+                (dom/h5 (str "时间: "  (:sendtime @app-state)) )
+              )
+              (dom/div  #js {:className "panel-body" :dangerouslySetInnerHTML #js {:__html (:body @app-state)}} nil)
             )
-            (dom/h5 "抄送: ")
-            (dom/h5 (str "时间: "  (:sendtime @app-state)) )
           )
-          (dom/div  #js {:className "panel-body" :dangerouslySetInnerHTML #js {:__html (:body @app-state)}} nil)
-          ;(dom/div {:className "panel-body"} (:body @app-state))
+        )
+        (dom/nav {:className "navbar navbar-default" :role "navigation"}
+          (dom/div {:className "navbar-header"}
+            (b/button {:className "btn btn-danger"} "删除")
+          )
         )
       )
+    )
 
-    )
-    (dom/nav {:className "navbar navbar-default" :role "navigation"}
-      (dom/div {:className "navbar-header"}
-        (b/button {:className "btn btn-danger"} "删除")
-      )
-    )
-)))
+  )
+)
 
 
 

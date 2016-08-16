@@ -24,6 +24,8 @@
         :mainmenu{
           :home "Home"
           :messages "Messages"
+          :msgdetail "Message Details"
+          :applicationdetail "My application"
           :leave "Leave"
           :payslip "Payslip"
           :subordinate "Subordinate"
@@ -36,6 +38,8 @@
         :mainmenu{
           :home "首页"
           :messages "我的消息"
+          :msgdetail "消息详细"
+          :applicationdetail "我的申请"
           :leave "休假"
           :payslip "薪资单"
           :subordinate "下属"
@@ -47,9 +51,6 @@
   }
 )
 
-(t :en-US my-tconfig :example/foo)
-(t :en    my-tconfig :example/foo)
-(t :en    my-tconfig :example/greeting "Steve")
 
 (defn numtolang [num]
   (let [res (case num

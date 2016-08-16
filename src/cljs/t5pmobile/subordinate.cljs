@@ -1,4 +1,4 @@
-(ns t5pmobile.leave  (:use [net.unit8.tower :only [t]])
+(ns t5pmobile.subordinate  (:use [net.unit8.tower :only [t]])
   (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [om.core :as om :include-macros true]
             [om-tools.dom :as dom :include-macros true]
@@ -27,9 +27,6 @@
 (defonce app-state (atom  {:modalText "THis the MOdal text" :modalTitle "This is the Modal Title"  :view 1 :leavecode "" :leavetypes [] :leaveapp {:leavecode "请选择"} } )) ;; :leavedays 0 :leavehours 0
 
 
-
-;(swap! app-state assoc-in [:leavetypes] {})
-;(swap! app-state assoc-in [:leavecodes] ())
 (defonce fieldnum (atom 0))
 
 (defn fields-to-map [fielddef]
@@ -582,95 +579,24 @@
 
 
 
-(defcomponent leave-page-view [data owner]
-  (did-mount [_]
-    (onMount data)
-  )
-  (did-update [this prev-props prev-state]
-    ;(.log js/console "Here hould be put!!!!") 
-    (put! ch 42)
-  )
+(defcomponent subordinate-page-view [data owner]
+  ;; (did-mount [_]
+  ;;   (onMount data)
+  ;; )
+  ;; (did-update [this prev-props prev-state]
+  ;;   ;(.log js/console "Here hould be put!!!!") 
+  ;;   ;(put! ch 42)
+  ;; )
   (render [_]
-    (dom/div
-      (om/build t5pcore/website-view data {})
-      (p/panel (merge {:header (dom/h3 "休假申请" )} {:bs-style "primary" :text-align "center"}  
-        {:footer (addModal)}  )
-
-        (dom/div {:className "panel-body"}
-          (dom/form {:className "form-horizontal"}
-            (dom/div {:className "form-group"}
-              (dom/label {:className "col-sm-2 control-label"} "类型"
-                (dom/span {:style {:color "Red"}} "*")
-              )
-              (dom/div {:className "col-sm-10"}
-                (b/button-group
-                  {:id "leavebtngroup" }
-                  (b/dropdown {:title (:leavecode (:leaveapp @app-state))  }
-                    (map (fn [item]
-                      (b/menu-item {:key (:leavecode item)  :on-select (fn [e](alertselected e))   } (:name item))
-                      )(:leavecodes data)
-                    )                  
-                  )
-                )
-              )
-            )
-
-            (map (fn [text]
-              (dom/div {:className "form-group"}
-                (dom/label {:className "col-sm-2 control-label"} 
-                  (dom/span {} (:name  (nth text 1)))
-                  (if ( = (:required (nth text 1)  ) true ) 
-                    (dom/span {:style {:color "Red"}} "*")
-                  )
-                )
-                (dom/div {:className "col-sm-10"}
-                  (cond 
-                    (= (:fieldtype (nth text 1)  )  0)
-                      (desplayComboboxField text)
-                    (= (:fieldtype (nth text 1)  )  1)
-                      (dom/input {:data-provide "datepicker" :id (name (first text) ) :oninput #(handle-change %)})
-                    (= (:fieldtype (nth text 1)  )  2)
-                      (dom/input {:type "text" :id (name (first text) ) :onChange #(handle-change %)})
-                    (= (:fieldtype (nth text 1)  )  3)
-                      (dom/input {:type "checkbox" :defaultChecked true :id (name (first text)) :label (:name  (nth text 1))
-                      :onChange ( fn [e]( handle-chkb-change  e )   ) 
-                      }) 
-                    (= (:fieldtype (nth text 1)  )  5)
-                      (dom/input {:type "text" :disabled true :value ((keyword (name (first text) )) (:leaveapp @app-state))  :ref (name (first text) ) :id (name (first text) )})
-
-                  )
-                )
-              )            
-              )
-              (sort 
-                #(compare ( :num ( nth %1 1)) ( :num( nth %2 1))) 
-                (filter (fn [x] ( not= (keyword (nth x 0)) :leavecode  )         )
-                  (into[] (:fields ((keyword (:leavecode (:leaveapp @app-state))) (:leavetypes @app-state)) )  )   
-                )
-                
-              )
-
-
-
-
-            )
-
-
-
-          )
-        )
-      
-      )  
-  
-    )
+    (dom/label "Under development")
   )
 )
 
 
 
 
-(sec/defroute leave-page "/leave" []
-  (om/root leave-page-view
+(sec/defroute subordinate-page "/subordinate" []
+  (om/root subordinate-page-view
            app-state
            {:target (. js/document (getElementById "app"))}))
 
