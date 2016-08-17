@@ -27,9 +27,13 @@
 (defonce app-state (atom  {:modalText "THis the MOdal text" :modalTitle "This is the Modal Title"  :view 1 :leavecode "" :leavetypes [] :leaveapp {:leavecode "请选择"} } )) ;; :leavedays 0 :leavehours 0
 
 
+(def custom-formatter1 (tf/formatter "MMM dd yyyy hh:mm:ss"))
+;(def custom-formatter2  (tf/formatter (:datemask (:User @t5pcore/app-state)) ))
 
-;(swap! app-state assoc-in [:leavetypes] {})
-;(swap! app-state assoc-in [:leavecodes] ())
+(def custom-formatter3 (tf/formatter "yyyy/MM/dd"))
+
+
+
 (defonce fieldnum (atom 0))
 
 (defn fields-to-map [fielddef]
@@ -218,24 +222,6 @@
   )
 )
 
-
-
-
-(defn onMount [data]
-  (swap! app-state assoc-in [:current] 
-       (t (t5pcore/numtolang  (:language (:User @t5pcore/app-state))) t5pcore/my-tconfig :mainmenu/leave)
-  )
-  (getLeaveTypes data)
-  (jquery
-   (fn []
-     (-> (jquery "#datepicker")
-       (.datepicker {})
-     )
-   )
-  )
-)
-
-
 (defn OnCalcLeave [response]
   (let [     
       newdata {:leavedays (get response "leavedays") :leavehours (get response "leavehours") }
@@ -249,7 +235,6 @@
   
   ;;(.log js/console (str  (get (first response)  "Title") ))
 )
-
 
 
 (defn calcleave []
@@ -283,50 +268,12 @@
   )  
 )
 
-(defn handle-chkb-change [e]
-  ;(.log js/console (.. e -target -id) )  
-  ;(.log js/console "The change ....")
-  (.stopPropagation e)
-  (.stopImmediatePropagation (.. e -nativeEvent) )
-  (swap! app-state assoc-in [:leaveapp (keyword  (.. e -currentTarget -id) )] 
-    (if (= true (.. e -currentTarget -checked)  ) 1 0)
-  )
-  (CheckCalcLeave)
-  ;(set! (.-checked (.. e -currentTarget)) false)
-  ;(dominalib/remove-attr!  (.. e -currentTarget) :checked)
-  ;;(dominalib/set-attr!  (.. e -currentTarget) :checked true)
-)
-
-(defn handle-chkb-click [e]
-  ;(.log js/console (.. e -target -id) )  
-  (.log js/console "The click ....")
-  (.stopPropagation e)
-  (.stopImmediatePropagation (.. e -nativeEvent) )
-  ;(set! (.-checked (.. e -currentTarget)) false) 
-  ;(dominalib/remove-attr!  (.. e -currentTarget) :checked)
-  ;;(dominalib/set-attr!  (.. e -currentTarget) :checked true)
-  ;;(dominaevents/stop-propagation e)
-  ;;(dominaevents/prevent-default e)
-)
-
-
-(defn handle-change [e]
-  ;(.log js/console (.. e -target -id) )  
-  (.log js/console "The run ....")
-)
-
-(def custom-formatter1 (tf/formatter "MMM dd yyyy hh:mm:ss"))
-;(def custom-formatter2  (tf/formatter (:datemask (:User @t5pcore/app-state)) ))
-
-(def custom-formatter3 (tf/formatter "yyyy/MM/dd"))
-
-
-
 
 (defn setNewLeaveAppValue [key val]
   (swap! app-state assoc-in [:leaveapp (keyword key)] val)
   (CheckCalcLeave)
 )
+
 
 (defn setdatepicker [field]
   (let [custom-formatter2  (tf/formatter (:datemask (:User @t5pcore/app-state)) )] 
@@ -419,7 +366,6 @@
   )
 )
 
-
 (defn setcalculatedfield [field] 
     ;(.log js/console (keyword  (nth field 0) )  )
     ;(.log js/console (get (nth fields 2 ) "fieldcode"    )   )
@@ -460,6 +406,74 @@
   (setcalculatedfields)
 )
 
+(defn initqueue []
+  (doseq [n (range 1000)]
+    (go ;(while true)
+      (take! ch(
+        fn [v] (
+           ;(setcalculatedfields) 
+           setcontrols 
+           ;.log js/console "Core.ASYNVC working!!!" 
+          )
+        )
+      )
+    )
+  )
+)
+
+
+(defn onMount [data]
+  (.log js/console "On mount leave happened") 
+  (swap! app-state assoc-in [:current] 
+       (t (t5pcore/numtolang  (:language (:User @t5pcore/app-state))) t5pcore/my-tconfig :mainmenu/leave)
+  )
+  (getLeaveTypes data)
+  (setcontrols)
+)
+
+(initqueue)
+
+
+(defn handle-chkb-change [e]
+  ;(.log js/console (.. e -target -id) )  
+  ;(.log js/console "The change ....")
+  (.stopPropagation e)
+  (.stopImmediatePropagation (.. e -nativeEvent) )
+  (swap! app-state assoc-in [:leaveapp (keyword  (.. e -currentTarget -id) )] 
+    (if (= true (.. e -currentTarget -checked)  ) 1 0)
+  )
+  (CheckCalcLeave)
+  ;(set! (.-checked (.. e -currentTarget)) false)
+  ;(dominalib/remove-attr!  (.. e -currentTarget) :checked)
+  ;;(dominalib/set-attr!  (.. e -currentTarget) :checked true)
+)
+
+(defn handle-chkb-click [e]
+  ;(.log js/console (.. e -target -id) )  
+  (.log js/console "The click ....")
+  (.stopPropagation e)
+  (.stopImmediatePropagation (.. e -nativeEvent) )
+  ;(set! (.-checked (.. e -currentTarget)) false) 
+  ;(dominalib/remove-attr!  (.. e -currentTarget) :checked)
+  ;;(dominalib/set-attr!  (.. e -currentTarget) :checked true)
+  ;;(dominaevents/stop-propagation e)
+  ;;(dominaevents/prevent-default e)
+)
+
+
+(defn handle-change [e]
+  ;(.log js/console (.. e -target -id) )  
+  (.log js/console "The run ....")
+)
+
+
+
+
+
+
+
+
+
 (defn alertselected1 [event param]
   ;(js/alert (str event  "ClojureScript says 'Boo!'" ))
  
@@ -497,21 +511,8 @@
   1
 )
 
-(defn initqueue []
-  (doseq [n (range 1000)]
-    (go ;(while true)
-      (take! ch (
-        fn [v] (
-                                        ;(setcalculatedfields) 
-           setcontrols 
-                                        ;.log js/console "Core.ASYNVC working!!!" 
-        )
-      ))
-    )
-  )
-)
 
-(initqueue)
+
 
 (defn leave-to-state [leave]
   (let [     
@@ -587,7 +588,14 @@
     (onMount data)
   )
   (did-update [this prev-props prev-state]
-    ;(.log js/console "Here hould be put!!!!") 
+    (.log js/console "Update happened") 
+    (jquery
+      (fn []
+        (-> (jquery "#datepicker")
+          (.datepicker {})
+        )
+      )
+    )
     (put! ch 42)
   )
   (render [_]
@@ -649,10 +657,6 @@
                 )
                 
               )
-
-
-
-
             )
 
 

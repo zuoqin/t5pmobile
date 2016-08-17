@@ -14,17 +14,16 @@
                  [compojure "1.5.0"]
                  [environ "1.0.3"]
                  [org.omcljs/om "1.0.0-alpha36"]
-                 [prismatic/schema "0.4.0"]
-                 [prismatic/om-tools "0.3.12"]
+                 
+                 [prismatic/om-tools "0.4.0"]
                  [secretary "1.2.1"]                 
-                 ;[bootstrap-cljs "0.28.1-0"]
-                 [racehub/om-bootstrap "0.5.0"]
-                 [org.omcljs/om "1.0.0-alpha31"]
+                 
+                 [racehub/om-bootstrap "0.6.1"]
+                 [org.omcljs/om "1.0.0-alpha41"]
                  [cljs-ajax "0.5.4"]
                  [com.andrewmcveigh/cljs-time "0.4.0"]    
 
-                 [net.unit8/tower-cljs "0.1.0"]
-                 ;[com.taoensso/tower "3.1.0-beta4"] ;;internalization technique       
+                 [net.unit8/tower-cljs "0.1.0"]   ;;internalization technique
                 ]
 
   :plugins [[lein-cljsbuild "1.1.3"]
