@@ -588,32 +588,17 @@
   ;;   (put! ch 42)
   ;; )
   (render [_]
-    (dom/div
-      (om/build t5pcore/website-view data {})
-      (p/panel (merge {:header (dom/h3 "休假申请" )} {:bs-style "primary" :text-align "center"}  
-        {:footer (addModal)}  )
+    (let [style {:style {:margin "10px;" :padding-bottom "0px;"}}
+      styleprimary {:style {:margin-top "70px"}}
+      ]
+      (dom/div
+        (om/build t5pcore/website-view data {})
 
-        (dom/div {:className "panel-body"}
-          (dom/form {:className "form-horizontal"}
-            (dom/div {:className "form-group"}
-              (dom/label {:className "col-sm-2 control-label"} "类型"
-                (dom/span {:style {:color "Red"}} "*")
-              )
-              (dom/div {:className "col-sm-10"}
-                (b/button-group
-                  {:id "leavebtngroup" }
-                  (b/dropdown {:title (:leavecode (:leaveapp @app-state))  }
-                    (b/menu-item {:key 1   } "Item 01")
-                    (b/menu-item {:key 2   } "Item 02")
-                    (b/menu-item {:key 3   } "Item 03")
-                    (b/menu-item {:key 4   } "Item 04")
-                  )
-                )
-              )
-            )
-          )
-        )
-      )  
+        (p/panel (assoc styleprimary  :className "panel panel-default"  :id "divMsgInfo")  
+
+          (dom/input {:data-provide "datepicker"})
+        )  
+      )
     )
   )
 )

@@ -9,6 +9,8 @@
             [t5pmobile.settings :as settings]
             [ajax.core :refer [GET POST]]
             [om-bootstrap.input :as i]
+            [om-bootstrap.button :as b]
+            [om-bootstrap.panel :as p]
             
             [t5pmobile.home :as home]
             [t5pmobile.leave :as leave]
@@ -23,7 +25,7 @@
 
 (enable-console-print!)
 
-
+(def jquery (js* "$"))
 (def my-tconfig
   {:dev-mode? true
    :fallback-locale :en
@@ -45,6 +47,42 @@
 (t :en    my-tconfig :example/foo)
 (t :en    my-tconfig :example/greeting "Steve")
 
+(defonce app-state (atom  {:error "" :modalText "Modal Text" :modalTitle "Modal Title"} ))
+
+
+(defn setLoginError [error]
+  (swap! app-state assoc-in [:error] 
+    (:error error)
+  )
+
+  (swap! app-state assoc-in [:modalTitle] 
+    (str "Login Error")
+  ) 
+
+  (swap! app-state assoc-in [:modalText] 
+    (str (:error error))
+  ) 
+  ;;(.log js/console (str  "In setLoginError" (:error error) ))
+  (jquery
+    (fn []
+      (-> (jquery "#loginModal")
+        (.modal)
+      )
+    )
+  )
+)
+
+
+(defn OnLoginError [response]
+  (let [     
+      newdata { :error (get (:response response)  "error") }
+    ]
+   
+    (setLoginError newdata)
+  )
+  
+  ;(.log js/console (str  response ))
+)
 
 
 
@@ -116,7 +154,7 @@
 
 (defn dologin [username password]
   (POST (str settings/apipath "Token") {:handler OnLogin
-                                            :error-handler error-handler
+                                            :error-handler OnLoginError
                                             :headers {:content-type "application/x-www-form-urlencoded"}
                                             :body (str "grant_type=password&username=" username "&password=" password) 
                                             })
@@ -138,6 +176,28 @@
 )
 
 
+(defn addModal []
+  (dom/div
+    (dom/div {:id "loginModal" :className "modal fade" :role "dialog"}
+      (dom/div {:className "modal-dialog"} 
+        ;;Modal content
+        (dom/div {:className "modal-content"} 
+          (dom/div {:className "modal-header"} 
+                   (b/button {:type "button" :className "close" :data-dismiss "modal"})
+                   (dom/h4 {:className "modal-title"} (:modalTitle @app-state) )
+                   )
+          (dom/div {:className "modal-body"}
+                   (dom/p (:modalText @app-state))
+                   )
+          (dom/div {:className "modal-footer"}
+                   (b/button {:type "button" :className "btn btn-default" :data-dismiss "modal"} "Close")
+          )
+        )
+      )
+    )
+  )
+)
+
 
 
 (defcomponent login-page-view [data owner]
@@ -152,10 +212,13 @@
       ;(dom/h1 "Login Page")
       (dom/img {:src "images/LogonBack.jpg" :className "img-responsive company-logo-logon"})
       (dom/form {:className "form-signin"}
-        (dom/input #js {:type "text" :ref "txtUserName" :value  settings/demouser  :className "form-control" :placeholder "User Name"} )
-        (dom/input {:className "form-control" :ref "txtPassword" :id "txtPassword" :value settings/demopassword :type "password"  :placeholder "Password"} )
+        (dom/input #js {:type "text" :ref "txtUserName"
+           :defaultValue  settings/demouser  :className "form-control" :placeholder "User Name"} )
+        (dom/input {:className "form-control" :ref "txtPassword" :id "txtPassword"
+           :defaultValue settings/demopassword :type "password"  :placeholder "Password"} )
         (dom/button #js {:className "btn btn-lg btn-primary btn-block" :type "button" :onClick (fn [e](checklogin owner))} "Login")
       )
+      (addModal)
     )
   )
 )
@@ -206,7 +269,7 @@
 
 (sec/defroute login-page "/login" []
   (om/root login-page-view 
-           t5pcore/app-state
+           app-state
            {:target (. js/document (getElementById "app"))}))
 
 
