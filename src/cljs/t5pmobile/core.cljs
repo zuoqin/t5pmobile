@@ -22,7 +22,7 @@
     :dictionary{
       :en{
         :mainmenu{
-          :home "Home"
+          :eportal "Home"
           :messages "Messages"
           :msgdetail "Message Details"
           :applicationdetail "My application"
@@ -30,13 +30,13 @@
           :payslip "Payslip"
           :subordinate "Subordinate"
           :settings "Settings"
-          :exit "Logout"
+          :hrms "HRMS"
         }
         :missing  "<Missing translation: [%1$s %2$s %3$s]>"
       }
       :cn{
         :mainmenu{
-          :home "首页"
+          :eportal "首页"
           :messages "我的消息"
           :msgdetail "消息详细"
           :applicationdetail "我的申请"
@@ -44,7 +44,7 @@
           :payslip "薪资单"
           :subordinate "下属"
           :settings "设置"
-          :exit "退出"
+          :hrms ""
         }
       }
     }
@@ -75,8 +75,185 @@
   (doto history (.setEnabled true)))
 
 
+(defn displaySystemMenuBlock []
+  (dom/li
+    (dom/a {:href "#"}
+      (dom/i {:className "fa fa-sitemap fa-fw"})
+      "System Menu"
+    )          
+  )
+)
 
-(defcomponent navigation-view [data owner]
+(defn displaySideBarBlock []
+  (dom/div {:className "navbar-default sidebar" :role "navigation"}
+    (dom/div {:className "sidebar-nav navbar-collapse"}
+      (dom/ul {:className "nav" :id "side-menu"}
+        (dom/li {:className "sidebar-search"}
+          (dom/div {:className "input-group custom-search-form"}
+            (dom/input {:className "form-control" :type "text" :placeholder "Search..."})
+            (dom/span {:className "input-group-btn"}
+              (dom/button {:className "btn btn-default" :type "button"}
+                (dom/i {:className "fa fa-search"})
+              )
+            )
+          )
+        )
+
+        (dom/li
+          (dom/a {:href "#/hrms"}
+            (dom/i {:className "fa fa-dashboard fa-fw"})
+            "Dashboard"
+          )
+          
+        )
+        (dom/li
+          (dom/a {:href "#"}
+            (dom/i {:className "fa fa-bar-chart-o fa-fw"})
+            (dom/span {:className "fa arrow"})
+            "Charts"
+          )
+          (dom/ul {:className "nav nav-second-level"}
+            (dom/li
+              (dom/a {:href "flot.html"} "Flot Charts")
+            )
+            (dom/li
+              (dom/a {:href "morris.html"} "Morris.js Charts")
+            )
+          )  ;; /.nav-second-level
+        )
+        (dom/li
+          (dom/a {:href "#/hrms"}
+            (dom/i {:className "fa fa-table fa-fw"})
+            "Journals"
+          )          
+        )
+        (dom/li
+          (dom/a {:href "#/hrms"}
+            (dom/i {:className "fa fa-edit fa-fw"})
+            "Forms"
+          )          
+        )
+        (displaySystemMenuBlock)
+      )
+    )
+  )
+)
+
+
+(defn displayUserSettingsBlock []
+  (dom/li {:className "dropdown"}
+    (dom/a {:className "dropdown-toggle" :data-toggle "dropdown" :href "#" }
+      (dom/i {:className "fa fa-user fa-fw"})
+      (dom/i {:className "fa fa-caret-down"})
+    )
+    (dom/ul {:className "dropdown-menu dropdown-user"}
+      (dom/li
+        (dom/a {:href "#"} 
+          (dom/i {:className "fa fa-user fa-fw"})
+          "User Profile"
+        )
+      )
+      (dom/li
+        (dom/a {:href "#"} 
+          (dom/i {:className "fa fa-gear fa-fw"})
+          "Settings"
+        )
+      )
+      (dom/li {:className "divider"})
+      (dom/li
+        (dom/a {:href "#/login"} 
+          (dom/i {:className "fa fa-sign-out fa-fw"})
+          "Logout"
+        )
+      )
+    )
+
+  )
+)
+
+(defn displayMessagesBlock []
+  (dom/li {:className "dropdown"}
+    (dom/a {:className "dropdown-toggle" :data-toggle "dropdown" :href "#" }
+      (dom/i {:className "fa fa-envelope fa-fw"})
+      (dom/i {:className "fa fa-caret-down"})
+    )
+    (dom/ul {:className "dropdown-menu dropdown-messages"}
+      (dom/li
+        (dom/a {:href "#"} 
+          (dom/div
+            (dom/strong "John Smith")
+            (dom/span {:className "pull-right text-muted"}
+              (dom/em "Yesterday")
+            )
+          )
+          (dom/div "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eleifend...")
+        )
+      )
+      (dom/li {:className "divider"})
+      (dom/li
+        (dom/a {:href "#"} 
+          (dom/div
+            (dom/strong "John Smith")
+            (dom/span {:className "pull-right text-muted"}
+              (dom/em "Yesterday")
+            )
+          )
+          (dom/div "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eleifend...")
+        )
+      )
+      (dom/li {:className "divider"})
+      (dom/li
+        (dom/a {:href "#"} 
+          (dom/div
+            (dom/strong "John Smith")
+            (dom/span {:className "pull-right text-muted"}
+              (dom/em "Yesterday")
+            )
+          )
+          (dom/div "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eleifend...")
+        )
+      )
+      (dom/li {:className "divider"})
+      (dom/li
+        (dom/a {:className "text-center" :href "#"}
+          (dom/strong "Read All Messages ")
+          (dom/i {:className "fa fa-angle-right"})
+        )
+      )
+    )
+  )
+)
+
+(defcomponent hrms-navigation-view [data owner]
+  (render [_]
+    (let [style {:style {:margin "10px" :padding-bottom "0px"}}
+      stylehome {:style {:margin-top "0px"} }
+      ]
+      (dom/nav {:className "navbar navbar-default navbar-fixed-top" :role "navigation"}
+        (dom/div {:className "navbar-header"}
+          (dom/button {:type "button" :className "navbar-toggle"
+            :data-toggle "collapse" :data-target ".navbar-ex1-collapse"}
+            (dom/span {:className "sr-only"} "Toggle navigation")
+            (dom/span {:className "icon-bar"})
+            (dom/span {:className "icon-bar"})
+            (dom/span {:className "icon-bar"})
+          )
+          (dom/a  (assoc stylehome :className "navbar-brand")
+            (dom/span {:id "pageTitle"}  (:current @data))
+          )
+        )
+        (dom/ul {:className "nav navbar-top-links navbar-right"}
+          (displayMessagesBlock)
+          (displayUserSettingsBlock)
+        )
+        (displaySideBarBlock)
+      )
+    )
+  )
+)
+
+
+(defcomponent eportal-navigation-view [data owner]
   (render [_]
     (let [style {:style {:margin "10px" :padding-bottom "0px"}}
       stylehome {:style {:margin-top "10px"} }
@@ -97,9 +274,9 @@
         (dom/div {:className "collapse navbar-collapse navbar-ex1-collapse" :id "menu"}
           (dom/ul {:className "nav navbar-nav"}
             (dom/li
-              (dom/a (assoc style :href "#/home")
+              (dom/a (assoc style :href "#/eportal")
                 (dom/span {:className "glyphicon glyphicon-home"})
-                  (t (numtolang  (:language (:User @app-state))) my-tconfig :mainmenu/home)
+                  (t (numtolang  (:language (:User @app-state))) my-tconfig :mainmenu/eportal)
                 )
             )
 
@@ -142,9 +319,9 @@
               )
             )         
             (dom/li
-              (dom/a (assoc style :href "#/login") 
+              (dom/a (assoc style :href "#/hrms") 
                 (dom/span {:className "glyphicon glyphicon-log-out"})
-                (t (numtolang  (:language (:User @app-state))) my-tconfig :mainmenu/exit)
+                (t (numtolang  (:language (:User @app-state))) my-tconfig :mainmenu/hrms)
               )
             )
           )
@@ -187,9 +364,18 @@
 
 (defmethod website-view 1
   [data owner] 
-  ;(.log js/console "One is found in view")
-  (navigation-view data owner)
+  (.log js/console "One is found in view")
+  (eportal-navigation-view data owner)
 )
+
+
+
+(defmethod website-view 2
+  [data owner] 
+  (.log js/console "Two is found in view")
+  (hrms-navigation-view data owner)
+)
+
 
 
 (defn index-page-view [app owner]

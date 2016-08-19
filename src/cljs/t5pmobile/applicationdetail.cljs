@@ -102,7 +102,7 @@
       styleprimary {:style {:margin-top "70px"}}
       ]
       (dom/div
-        (om/build t5pcore/navigation-view data {})
+        (om/build t5pcore/website-view data {})
         (dom/div {:id "leave-detail-container"}
           (dom/div (assoc styleprimary  :className "panel panel-default"  :id "divMsgInfo")
             (dom/div {:className "panel-heading"}

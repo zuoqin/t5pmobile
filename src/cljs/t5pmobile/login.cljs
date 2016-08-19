@@ -12,13 +12,14 @@
             [om-bootstrap.button :as b]
             [om-bootstrap.panel :as p]
             
-            [t5pmobile.home :as home]
+            [t5pmobile.eportal :as eportal]
             [t5pmobile.leave :as leave]
             [t5pmobile.messages :as messages]
             [t5pmobile.msgdetail :as msgdetail]
             [t5pmobile.applicationdetail :as applicationdetail]
             [t5pmobile.user :as user]
             [t5pmobile.subordinate :as subordinate]
+            [t5pmobile.hrmshome :as admin]
   )
   (:import goog.History)
 )
@@ -141,7 +142,7 @@
     (swap! t5pcore/app-state assoc-in [:view] 1 )
     (reqemployee)
     (requser)
-    (aset js/window "location" "#/home")
+    (aset js/window "location" "#/hrms")
 
   )
   

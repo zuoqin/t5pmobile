@@ -22,7 +22,7 @@
 (enable-console-print!)
 
 
-(defonce app-state (atom  {:msgid 0 :current "Message Details"} ))
+(defonce app-state (atom  {:view 1 :msgid 0 :current "Message Details"} ))
 
 
 (defn array-to-string [element]
@@ -103,7 +103,7 @@
       styleprimary {:style {:margin-top "70px"}}
       ]
       (dom/div
-        (om/build t5pcore/navigation-view data {})
+        (om/build t5pcore/website-view data {})
         (dom/div {:id "message-detail-container"}
           (dom/span
             (dom/div  (assoc styleprimary  :className "panel panel-default"  :id "divMsgInfo")

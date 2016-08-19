@@ -13,7 +13,7 @@
 
 (enable-console-print!)
 
-(def apipath "http://api.t5p.hk/")
+(def apipath "http://localhost/T5PWebAPI/")
 (def demouser "nacho")
 (def demopassword "12345")
 
