@@ -6,6 +6,7 @@
             [goog.events :as events]
             [goog.history.EventType :as EventType]
             [ajax.core :refer [GET POST]]
+            [t5pmobile.settings :as settings]
   )
   (:import goog.History)
 )
@@ -15,7 +16,7 @@
 (defonce app-state (atom {:view 0 :current "Home"}))
 
 
-
+(def jquery (js* "$"))
 (def my-tconfig
   {:dev-mode? true
     :fallback-locale :en
@@ -75,16 +76,104 @@
   (doto history (.setEnabled true)))
 
 
-(defn displaySystemMenuBlock []
-  (dom/li
-    (dom/a {:href "#"}
-      (dom/i {:className "fa fa-sitemap fa-fw"})
-      "System Menu"
-    )          
+
+(defn error-handler [{:keys [status status-text]}]
+  (.log js/console (str "something bad happened: " status " " status-text))
+)
+
+
+(defn menus-to-map [menu]
+  (let [     
+      newdata {:menucode (get menu "menucode") :menulevel (get menu "menulevel") :menuopt (get menu "menuopt")
+               :menuorder (get menu "menuorder") :name (get menu "name") :submenu (get menu "submenu")}
+    ]
+    ;(.log js/console newdata)
+    newdata
+  )
+  
+)
+
+(defn OnGetSysMenu [response]
+  (let [ 
+    newdata (map menus-to-map response)
+    ]
+    (swap! app-state assoc-in [:sysmenus]   (into []  newdata) )
+    ;(.log js/console newdata)
   )
 )
 
-(defn displaySideBarBlock []
+
+(defn getSysMenus []
+  (GET (str settings/apipath "api/sysmenu") {
+    :handler OnGetSysMenu
+    :error-handler error-handler
+    :headers {
+      :content-type "application/json"
+      :Authorization (str "Bearer "  (:token  (first (:token @app-state)))) }
+  })
+)
+
+
+(defn buildSysMenuLevel3 [data]
+
+  (map (fn [text]
+    (dom/li
+      (dom/a {:href "#"} 
+        (:name text)
+      )
+    )
+    )
+    (sort 
+      #(compare ( :menuorder %1) ( :menuorder %2)) 
+      (filter (
+        fn [x] (
+            and (= (:menulevel x) 1)  (= (:menucode x) (:submenu data))   
+          )
+        )
+        (into[] (:sysmenus @app-state )  )   
+      )
+    )
+  )
+)
+
+
+(defn buildSysMenuLevel2 [data]
+  (map (fn [text]
+    (dom/li
+      (dom/a {:href "#"} 
+        (:name text)
+        (dom/span {:className "fa arrow"})
+      )
+      (dom/ul {:className "nav nav-third-level"}
+        (buildSysMenuLevel3 text)
+      )      
+    )
+    )
+    (sort 
+      #(compare ( :menuorder %1) ( :menuorder %2)) 
+      (filter (fn [x] ( = (:menulevel x) 0  )         )
+        (into[] (:sysmenus data )  )   
+      )
+    )
+  )
+)
+
+
+(defn displaySystemMenuBlock [data]
+  (dom/li
+    (dom/a {:href "#"}
+      (dom/i {:className "fa fa-sitemap fa-fw"})
+      (dom/span {:className "fa arrow"})
+      "System Menu"
+    )
+    (dom/ul {:className "nav nav-second-level"}
+      (buildSysMenuLevel2 data)
+    )
+  )
+)
+
+
+(defn displaySideBarBlock [data]
   (dom/div {:className "navbar-default sidebar" :role "navigation"}
     (dom/div {:className "sidebar-nav navbar-collapse"}
       (dom/ul {:className "nav" :id "side-menu"}
@@ -109,15 +198,16 @@
         (dom/li
           (dom/a {:href "#"}
             (dom/i {:className "fa fa-bar-chart-o fa-fw"})
-            (dom/span {:className "fa arrow"})
             "Charts"
+            (dom/span {:className "fa arrow"})
+            
           )
           (dom/ul {:className "nav nav-second-level"}
             (dom/li
-              (dom/a {:href "flot.html"} "Flot Charts")
+              (dom/a {:href "#"} "Flot Charts")
             )
             (dom/li
-              (dom/a {:href "morris.html"} "Morris.js Charts")
+              (dom/a {:href "#"} "Morris.js Charts")
             )
           )  ;; /.nav-second-level
         )
@@ -133,14 +223,14 @@
             "Forms"
           )          
         )
-        (displaySystemMenuBlock)
+        (displaySystemMenuBlock data)
       )
     )
   )
 )
 
 
-(defn displayUserSettingsBlock []
+(defn displayUserSettingsBlock [data]
   (dom/li {:className "dropdown"}
     (dom/a {:className "dropdown-toggle" :data-toggle "dropdown" :href "#" }
       (dom/i {:className "fa fa-user fa-fw"})
@@ -171,7 +261,7 @@
   )
 )
 
-(defn displayMessagesBlock []
+(defn displayMessagesBlock [data]
   (dom/li {:className "dropdown"}
     (dom/a {:className "dropdown-toggle" :data-toggle "dropdown" :href "#" }
       (dom/i {:className "fa fa-envelope fa-fw"})
@@ -224,15 +314,39 @@
   )
 )
 
+
+(defn onMount [data]
+ 
+  (swap! app-state assoc-in [:current] 
+       (t (numtolang  (:language (:User @app-state))) my-tconfig :mainmenu/hrms)
+  )
+  (getSysMenus)
+)
+
+
+
 (defcomponent hrms-navigation-view [data owner]
+  (did-mount [_]
+    (onMount data)
+  )
+  (did-update [this prev-props prev-state]
+    (.log js/console "Update happened") 
+    (jquery
+      (fn []
+        (-> (jquery "#side-menu")
+          (.metisMenu)
+        )
+      )
+    )
+  )
   (render [_]
     (let [style {:style {:margin "10px" :padding-bottom "0px"}}
       stylehome {:style {:margin-top "0px"} }
       ]
-      (dom/nav {:className "navbar navbar-default navbar-fixed-top" :role "navigation"}
+      (dom/nav {:className "navbar navbar-default navbar-static-top" :role "navigation"}
         (dom/div {:className "navbar-header"}
           (dom/button {:type "button" :className "navbar-toggle"
-            :data-toggle "collapse" :data-target ".navbar-ex1-collapse"}
+            :data-toggle "collapse" :data-target ".navbar-collapse"}
             (dom/span {:className "sr-only"} "Toggle navigation")
             (dom/span {:className "icon-bar"})
             (dom/span {:className "icon-bar"})
@@ -243,10 +357,10 @@
           )
         )
         (dom/ul {:className "nav navbar-top-links navbar-right"}
-          (displayMessagesBlock)
-          (displayUserSettingsBlock)
+          (displayMessagesBlock data)
+          (displayUserSettingsBlock data)
         )
-        (displaySideBarBlock)
+        (displaySideBarBlock data)
       )
     )
   )
@@ -405,7 +519,7 @@
       .-location
       (set! "#/"))
 
-  (aset js/window "location" "#/login")
+  (aset js/window "location" "#/hrms")
 )
   
 ;(main)
