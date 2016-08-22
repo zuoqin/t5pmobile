@@ -8,6 +8,8 @@
             [t5pmobile.core :as t5pcore]
             [ajax.core :refer [GET POST]]
             [t5pmobile.settings :as settings]
+
+            [t5pmobile.newemplist :as newemplist]
             
   )
   (:import goog.History)

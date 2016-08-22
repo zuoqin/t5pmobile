@@ -13,7 +13,7 @@
 
 (enable-console-print!)
 
-(defonce app-state (atom {:view 0 :current "Home"}))
+(defonce app-state (atom {:view 2 :current "Home"}))
 
 
 (def jquery (js* "$"))
@@ -32,6 +32,7 @@
           :subordinate "Subordinate"
           :settings "Settings"
           :hrms "HRMS"
+          :newemplist "New Employee List"
         }
         :missing  "<Missing translation: [%1$s %2$s %3$s]>"
       }
@@ -45,7 +46,9 @@
           :payslip "薪资单"
           :subordinate "下属"
           :settings "设置"
-          :hrms ""
+          :hrms "人力资源管理系统"
+          :newemplist "新员工列表"
+          
         }
       }
     }
@@ -321,6 +324,13 @@
        (t (numtolang  (:language (:User @app-state))) my-tconfig :mainmenu/hrms)
   )
   (getSysMenus)
+  (jquery
+    (fn []
+      (-> (jquery "#side-menu")
+        (.metisMenu)
+      )
+    )
+  )
 )
 
 
@@ -330,7 +340,7 @@
     (onMount data)
   )
   (did-update [this prev-props prev-state]
-    (.log js/console "Update happened") 
+    ;(.log js/console "Update happened") 
     (jquery
       (fn []
         (-> (jquery "#side-menu")
@@ -478,7 +488,7 @@
 
 (defmethod website-view 1
   [data owner] 
-  (.log js/console "One is found in view")
+  ;(.log js/console "One is found in view")
   (eportal-navigation-view data owner)
 )
 
@@ -486,7 +496,7 @@
 
 (defmethod website-view 2
   [data owner] 
-  (.log js/console "Two is found in view")
+  ;(.log js/console "Two is found in view")
   (hrms-navigation-view data owner)
 )
 
