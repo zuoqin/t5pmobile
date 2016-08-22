@@ -6,6 +6,7 @@
             [goog.events :as events]
             [goog.history.EventType :as EventType]
             [t5pmobile.core :as t5pcore]
+            [t5pmobile.settings :as settings]
             [ajax.core :refer [GET POST]]
             
   )
@@ -14,8 +15,128 @@
 
 (enable-console-print!)
 
+
+
+(def my-tconfig
+  {:dev-mode? true
+    :fallback-locale :en
+    :dictionary{
+      :en{
+        :emplist{
+          :empcode "Code"
+          :name "Name"
+          :hirestatus "Hire Status"
+          :birthday "Birthday"
+          :gender "Gender"
+          :major "Major"
+        }
+      }
+      :cn{
+        :emplist{
+          :empcode "编码"
+          :name "姓名"
+          :hirestatus "雇佣状态"
+          :birthday "生日"
+          :gender "性别"
+          :major "专业"
+          
+        }
+      }
+    }
+  }
+)
+
+
 (defonce app-state (atom  {:view 2  :current "New Employee List"} ))
 (def jquery (js* "$"))
+
+
+
+(defn error-handler [{:keys [status status-text]}]
+  (.log js/console (str "something bad happened: " status " " status-text))
+)
+
+
+(defn employees-to-map [employee]
+  (let [     
+      newdata {
+               ;:empid (get employee "empid") 
+               :empcode (get employee "empcode") :empname (get employee "empname")
+               :hirestatus (get employee "hirestatus") :birthday (get employee "birthday")
+               ;:gender (get employee "gender")
+               ;:major (get employee "major")
+      }
+    ]
+    ;(.log js/console newdata)
+    newdata
+  )
+  
+)
+
+;(def js-object  (clj->js  :responsive "true" :data (:employees @app-state) ))
+
+
+(defn newempmap-to-array [employee]
+  (let [     
+      newdata [(:empcode employee) (:name employee) (:hirestatus employee) (:birthday employee)] 
+    ]
+    ;(.log js/console newdata)
+    newdata
+  )
+  
+)
+
+(defn OnGetNewEmployees [response]
+  (let [ 
+    newdata (map employees-to-map response)
+    newdata2 (map newempmap-to-array newdata)
+    ]
+    (swap! app-state assoc-in [:employees]   (into []  newdata) )
+
+    (swap! app-state assoc-in [:employees2]   (into []  newdata2) )
+    ;(.log js/console newdata)
+
+    (jquery
+      (fn []
+        (-> (jquery "#dataTables-example")
+          (.DataTable   (clj->js {:responsive "true"
+                                  :data (into [] (into [] (:employees2 @app-state)))
+;; [
+;;                                                             ["Tiger Nixon" "System Architect" "Edinburgh" "5421"]
+;;                                                             ["Garrett Winters" "Director" "moscow" "8956"]
+;;   ]
+                                  } )  )
+        )
+      )
+    )
+  )
+)
+
+
+(defn getNewEmployees []
+  (GET (str settings/apipath "api/empnew") {
+    :handler OnGetNewEmployees
+    :error-handler error-handler
+    :headers {
+      :content-type "application/json"
+      :Authorization (str "Bearer "  (:token  (first (:token @t5pcore/app-state)))) }
+  })
+)
+
+
+(defn buildEmployeeList []
+  (map
+    (fn [text]
+      (dom/tr {:className "odd gradeX"}
+        (dom/td (:empcode text))
+        (dom/td (:name text))
+        (dom/td (:hirestatus text))
+        (dom/td {:className "center"} (:birthday text))
+      )
+    )
+    (:employees @app-state )
+  )
+)
 
 (defn buildMainWrapper [data]
   (dom/div {:id "page-wrapper"}
@@ -33,36 +154,14 @@
 
           (dom/div {:className "panel-body"}
             (dom/div {:className "dataTable_wrapper"}
-              (dom/table {:className "table table-striped table-bordered table-hover" :id "dataTables-example" :style {:width "100%"}}
+              (dom/table {:className "table table-striped table-bordered table-hover" :id "dataTables-example" :style {:width "100%" :cellspacing "0"}}
                 (dom/thead
                   (dom/tr
-                    (dom/th "Rendering engine")
-                    (dom/th "Browser")
-                    (dom/th "Platform(s)")
-                    (dom/th "Engine version")
+                    (dom/th  (t (t5pcore/numtolang  (:language (:User @t5pcore/app-state))) my-tconfig :emplist/empcode) )
+                    (dom/th  (t (t5pcore/numtolang  (:language (:User @t5pcore/app-state))) my-tconfig :emplist/name) )
+                    (dom/th  (t (t5pcore/numtolang  (:language (:User @t5pcore/app-state))) my-tconfig :emplist/hirestatus) )
+                    (dom/th  (t (t5pcore/numtolang  (:language (:User @t5pcore/app-state))) my-tconfig :emplist/birthday))
                   )
-                )
-                (dom/tbody
-                  (dom/tr {:className "odd gradeX"}
-                    (dom/td "Trident")
-                    (dom/td "Internet Explorer 4.0")
-                    (dom/td "Win 95+")
-                    (dom/td {:className "center"} "4")
-                  )
-                  (dom/tr {:className "odd gradeX"}
-                    (dom/td "Trident2")
-                    (dom/td "Internet Explorer 7.0")
-                    (dom/td "Mac")
-                    (dom/td {:className "center"} "10")
-                  )
-
-                  (dom/tr {:className "odd gradeX"}
-                    (dom/td "Trident3")
-                    (dom/td "Internet Explorer 8.0")
-                    (dom/td "Linux")
-                    (dom/td {:className "center"} "70")
-                  )
-
                 )
               )
             )
@@ -81,6 +180,8 @@
        (t (t5pcore/numtolang  (:language (:User @t5pcore/app-state))) t5pcore/my-tconfig :mainmenu/newemplist)
   )
   (swap! app-state assoc-in [:sysmenus] (:sysmenus @t5pcore/app-state))
+
+  (getNewEmployees)
 )
 
 
@@ -98,15 +199,18 @@
         )
       )
     )
+    ;; (if (> (:employees @app-state) 0)
+    ;;   (jquery
+    ;;     (fn []
+    ;;       (-> (jquery "#dataTables-example")
+    ;;         (.DataTable "responsive" "true")
+    ;;       )
+    ;;     )
+    ;;   )
+    ;; )
 
-    (jquery
-      (fn []
-        (-> (jquery "#dataTables-example")
-          (.DataTable "responsive" "true")
-        )
-      )
-    )
   )
+
   (render [_]
     (dom/div
       (om/build t5pcore/website-view data {})
