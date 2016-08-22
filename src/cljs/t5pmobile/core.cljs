@@ -88,7 +88,9 @@
 (defn menus-to-map [menu]
   (let [     
       newdata {:menucode (get menu "menucode") :menulevel (get menu "menulevel") :menuopt (get menu "menuopt")
-               :menuorder (get menu "menuorder") :name (get menu "name") :submenu (get menu "submenu")}
+               :menuorder (get menu "menuorder") :name (get menu "name") :submenu (get menu "submenu")
+               :urltarget (get menu "urltarget")
+               }
     ]
     ;(.log js/console newdata)
     newdata
@@ -121,7 +123,7 @@
 
   (map (fn [text]
     (dom/li
-      (dom/a {:href "#"} 
+      (dom/a {:href (str "#/" (:urltarget text)) } 
         (:name text)
       )
     )
@@ -143,7 +145,7 @@
 (defn buildSysMenuLevel2 [data]
   (map (fn [text]
     (dom/li
-      (dom/a {:href "#"} 
+      (dom/a {:href (str "#/" (:urltarget text)) } 
         (:name text)
         (dom/span {:className "fa arrow"})
       )

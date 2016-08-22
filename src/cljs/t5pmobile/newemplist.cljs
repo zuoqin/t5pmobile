@@ -1,4 +1,5 @@
 (ns t5pmobile.newemplist (:use [net.unit8.tower :only [t]])
+    (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [om.core :as om :include-macros true]
             [om-tools.dom :as dom :include-macros true]
             [om-tools.core :refer-macros [defcomponent]]
@@ -8,6 +9,8 @@
             [t5pmobile.core :as t5pcore]
             [t5pmobile.settings :as settings]
             [ajax.core :refer [GET POST]]
+
+             [cljs.core.async :refer [put! dropping-buffer chan take! <!]]
             
   )
   (:import goog.History)
@@ -15,7 +18,7 @@
 
 (enable-console-print!)
 
-
+(def ch (chan (dropping-buffer 2)))
 
 (def my-tconfig
   {:dev-mode? true
@@ -23,6 +26,7 @@
     :dictionary{
       :en{
         :emplist{
+          :empid "#"
           :empcode "Code"
           :name "Name"
           :hirestatus "Hire Status"
@@ -33,6 +37,7 @@
       }
       :cn{
         :emplist{
+          :empid "号码"
           :empcode "编码"
           :name "姓名"
           :hirestatus "雇佣状态"
@@ -60,11 +65,11 @@
 (defn employees-to-map [employee]
   (let [     
       newdata {
-               ;:empid (get employee "empid") 
+               :empid (get employee "empid") 
                :empcode (get employee "empcode") :empname (get employee "empname")
                :hirestatus (get employee "hirestatus") :birthday (get employee "birthday")
-               ;:gender (get employee "gender")
-               ;:major (get employee "major")
+               :gender (get employee "gender")
+               :major (get employee "major")
       }
     ]
     ;(.log js/console newdata)
@@ -73,12 +78,13 @@
   
 )
 
-;(def js-object  (clj->js  :responsive "true" :data (:employees @app-state) ))
+(def js-object  (clj->js  { :columnDefs [ {:visible false :targets [0]}]}  ))
+;(def js-object  #js { :responsive "true" :columnDefs #js [ {:visible "false" :targets #js [0]}]}  )
 
 
 (defn newempmap-to-array [employee]
   (let [     
-      newdata [(:empcode employee) (:name employee) (:hirestatus employee) (:birthday employee)] 
+      newdata [ (:empcode employee) (:name employee) (:hirestatus employee) (:birthday employee) (:empid employee)] 
     ]
     ;(.log js/console newdata)
     newdata
@@ -86,29 +92,60 @@
   
 )
 
+(defn setcontrols []
+  (.log js/console (count (:employees @app-state)))
+      (jquery
+       (fn []
+         (-> (jquery "#dataTables-example" )
+           (.DataTable js-object)
+           (.on "click" "tr"
+             (fn [e] (
+                let [table (-> (jquery "#dataTables-example")
+                                  (.DataTable)   
+                                )
+                     res (.data (.row table (.. e -currentTarget)) )
+
+
+                ]
+                (.log js/console (first res)) 
+               )
+             )
+           )
+         )      
+       )
+      )  
+)
+
+(defn initqueue []
+  (doseq [n (range 1000)]
+    (go ;(while true)
+      (take! ch(
+        fn [v] (
+           ;(setcalculatedfields) 
+           setcontrols 
+           ;.log js/console "Core.ASYNVC working!!!" 
+          )
+        )
+      )
+    )
+  )
+)
+
+(initqueue)
+
 (defn OnGetNewEmployees [response]
   (let [ 
-    newdata (map employees-to-map response)
-    newdata2 (map newempmap-to-array newdata)
+        newdata (map employees-to-map response)
+        newdata2 (map newempmap-to-array newdata)
     ]
     (swap! app-state assoc-in [:employees]   (into []  newdata) )
 
     (swap! app-state assoc-in [:employees2]   (into []  newdata2) )
-    ;(.log js/console newdata)
+    ;(.log js/console js-object)
+    (put! ch 42)
+    ;(setcontrols)
 
-    (jquery
-      (fn []
-        (-> (jquery "#dataTables-example")
-          (.DataTable   (clj->js {:responsive "true"
-                                  :data (into [] (into [] (:employees2 @app-state)))
-;; [
-;;                                                             ["Tiger Nixon" "System Architect" "Edinburgh" "5421"]
-;;                                                             ["Garrett Winters" "Director" "moscow" "8956"]
-;;   ]
-                                  } )  )
-        )
-      )
-    )
+
   )
 )
 
@@ -128,10 +165,12 @@
   (map
     (fn [text]
       (dom/tr {:className "odd gradeX"}
+        (dom/td (:empid text))
         (dom/td (:empcode text))
         (dom/td (:name text))
         (dom/td (:hirestatus text))
         (dom/td {:className "center"} (:birthday text))
+        (dom/td (:major text))
       )
     )
     (:employees @app-state )
@@ -157,11 +196,17 @@
               (dom/table {:className "table table-striped table-bordered table-hover" :id "dataTables-example" :style {:width "100%" :cellspacing "0"}}
                 (dom/thead
                   (dom/tr
+                    (dom/th  (t (t5pcore/numtolang  (:language (:User @t5pcore/app-state))) my-tconfig :emplist/empid) )
                     (dom/th  (t (t5pcore/numtolang  (:language (:User @t5pcore/app-state))) my-tconfig :emplist/empcode) )
                     (dom/th  (t (t5pcore/numtolang  (:language (:User @t5pcore/app-state))) my-tconfig :emplist/name) )
                     (dom/th  (t (t5pcore/numtolang  (:language (:User @t5pcore/app-state))) my-tconfig :emplist/hirestatus) )
                     (dom/th  (t (t5pcore/numtolang  (:language (:User @t5pcore/app-state))) my-tconfig :emplist/birthday))
+                    (dom/th  (t (t5pcore/numtolang  (:language (:User @t5pcore/app-state))) my-tconfig :emplist/major))
                   )
+                )
+                (dom/tbody
+                  (buildEmployeeList)
+
                 )
               )
             )
@@ -199,6 +244,9 @@
         )
       )
     )
+    (.log js/console "Update happened") 
+
+    ;(put! ch 42)
     ;; (if (> (:employees @app-state) 0)
     ;;   (jquery
     ;;     (fn []
@@ -208,6 +256,9 @@
     ;;     )
     ;;   )
     ;; )
+
+
+
 
   )
 
