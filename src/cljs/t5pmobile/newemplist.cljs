@@ -10,7 +10,7 @@
             [t5pmobile.settings :as settings]
             [ajax.core :refer [GET POST]]
 
-             [cljs.core.async :refer [put! dropping-buffer chan take! <!]]
+            [cljs.core.async :refer [put! dropping-buffer chan take! <!]]
             
   )
   (:import goog.History)
@@ -78,7 +78,7 @@
   
 )
 
-(def js-object  (clj->js  { :columnDefs [ {:visible false :targets [0]}]}  ))
+(def js-object  (clj->js  { :columnDefs [ {:visible false :targets [0]}]  :lengthMenu [[5, 10, 25, -1], [5, 10, 25, "All"]] }  ))
 ;(def js-object  #js { :responsive "true" :columnDefs #js [ {:visible "false" :targets #js [0]}]}  )
 
 
@@ -92,8 +92,18 @@
   
 )
 
+
+(defn gotoSelection [empid]
+  (-> js/document
+      .-location
+      (set! (str "#/newemprec/" empid) ))
+
+  ;(aset js/window "location" "#/login")
+)
+
+
 (defn setcontrols []
-  (.log js/console (count (:employees @app-state)))
+  (.log js/console js-object)
       (jquery
        (fn []
          (-> (jquery "#dataTables-example" )
@@ -107,7 +117,8 @@
 
 
                 ]
-                (.log js/console (first res)) 
+                (.log js/console (first res))
+                (gotoSelection (first res)) 
                )
              )
            )
@@ -226,7 +237,10 @@
   )
   (swap! app-state assoc-in [:sysmenus] (:sysmenus @t5pcore/app-state))
 
-  (getNewEmployees)
+  (if (= (count (:employees @app-state) )  0)
+    (getNewEmployees)
+    (put! ch 42)
+  )
 )
 
 
@@ -265,7 +279,6 @@
   (render [_]
     (dom/div
       (om/build t5pcore/website-view data {})
-      ;(dom/h1 "About Page")
       (buildMainWrapper data)
     )
   )

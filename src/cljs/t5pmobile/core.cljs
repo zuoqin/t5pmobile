@@ -325,7 +325,10 @@
   (swap! app-state assoc-in [:current] 
        (t (numtolang  (:language (:User @app-state))) my-tconfig :mainmenu/hrms)
   )
-  (getSysMenus)
+  (if (< (count (:sysmenus @app-state)) 1)
+    (getSysMenus)  
+  )
+  
   (jquery
     (fn []
       (-> (jquery "#side-menu")

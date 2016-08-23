@@ -10,6 +10,7 @@
             [t5pmobile.settings :as settings]
 
             [t5pmobile.newemplist :as newemplist]
+            [t5pmobile.newemprec :as newemprec]
             
   )
   (:import goog.History)
