@@ -82,15 +82,15 @@
 ;(def js-object  #js { :responsive "true" :columnDefs #js [ {:visible "false" :targets #js [0]}]}  )
 
 
-(defn newempmap-to-array [employee]
-  (let [     
-      newdata [ (:empcode employee) (:name employee) (:hirestatus employee) (:birthday employee) (:empid employee)] 
-    ]
-    ;(.log js/console newdata)
-    newdata
-  )
+;; (defn newempmap-to-array [employee]
+;;   (let [     
+;;       newdata [ (:empcode employee) (:empname employee) (:hirestatus employee) (:birthday employee) (:empid employee)] 
+;;     ]
+;;     ;(.log js/console newdata)
+;;     newdata
+;;   )
   
-)
+;; )
 
 
 (defn gotoSelection [empid]
@@ -147,11 +147,11 @@
 (defn OnGetNewEmployees [response]
   (let [ 
         newdata (map employees-to-map response)
-        newdata2 (map newempmap-to-array newdata)
+        ;newdata2 (map newempmap-to-array newdata)
     ]
     (swap! app-state assoc-in [:employees]   (into []  newdata) )
 
-    (swap! app-state assoc-in [:employees2]   (into []  newdata2) )
+    ;(swap! app-state assoc-in [:employees2]   (into []  newdata2) )
     ;(.log js/console js-object)
     (put! ch 42)
     ;(setcontrols)
@@ -178,7 +178,7 @@
       (dom/tr {:className "odd gradeX"}
         (dom/td (:empid text))
         (dom/td (:empcode text))
-        (dom/td (:name text))
+        (dom/td (:empname text))
         (dom/td (:hirestatus text))
         (dom/td {:className "center"} (:birthday text))
         (dom/td (:major text))
@@ -279,7 +279,10 @@
   (render [_]
     (dom/div
       (om/build t5pcore/website-view data {})
-      (buildMainWrapper data)
+      (if (> (count (:employees @app-state)) 0 )
+        (buildMainWrapper data)
+      )
+      
     )
   )
 )

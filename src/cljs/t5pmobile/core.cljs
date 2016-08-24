@@ -243,13 +243,13 @@
     )
     (dom/ul {:className "dropdown-menu dropdown-user"}
       (dom/li
-        (dom/a {:href "#"} 
+        (dom/a {:href "#/user"} 
           (dom/i {:className "fa fa-user fa-fw"})
           "User Profile"
         )
       )
       (dom/li
-        (dom/a {:href "#"} 
+        (dom/a {:href "#/user"} 
           (dom/i {:className "fa fa-gear fa-fw"})
           "Settings"
         )

@@ -93,9 +93,22 @@
       :hirestatus (get response "hirestatus") :birthday (get response "birthday")
       :gender (get response "gender")
       :major (get response "major")
+      :payrollgroupid (get response "payrollgroupid")
+      :payrollgroupname (get response "payrollgroupname")
       }
     ]
     (swap! app-state assoc-in [:employee]  newdata )
+    (swap! app-state assoc-in [:form :empcode]  (:empcode newdata )  )
+    ;; (if (> (count (:payrollgroups @app-state)) 0)
+    ;;   (jquery
+    ;;     (fn []
+    ;;       (-> (jquery "#payrollgroups" )
+    ;;         (.selectpicker "val" (:payrollgroupid newdata))
+    ;;       )
+    ;;     )
+    ;;   )
+
+    ;; )
   )
 )
 
@@ -155,37 +168,108 @@
 )
 
 
+(defn onDropDownChange [id value]
+  ;(.log js/console () e)
+  (swap! app-state assoc-in [:form (keyword id)] value) 
+)
+
+(defn handle-change [e owner]
+  (.log js/console () e)
+  (swap! app-state assoc-in [:form (keyword (.. e -target -id))] 
+    (.. e -target -value)
+  ) 
+)
+
+(defn setpayrollgroupsDropDown []
+  (put! ch 46) 
+  (jquery
+    (fn []
+      (-> (jquery "#payrollgroups" )
+        (.selectpicker {})
+        (.on "change"
+          (fn [e]
+            (
+              onDropDownChange (.. e -target -id) (.. e -target -value)
+            )
+          )
+        )
+      )
+    )
+  )
+)
+
+(defn setorganizationsDropDown []
+  (put! ch 46) 
+  (jquery
+    (fn []
+      (-> (jquery "#organizations" )
+        (.selectpicker {})
+        (.on "change"
+          (fn [e]
+            (
+              onDropDownChange (.. e -target -id) (.. e -target -value)
+            )
+          )
+        )
+      )
+    )
+  )
+)
+
+
 (defn setcontrols [value]
   (case value
-        42 (jquery
-            (fn []
-              (-> (jquery "#organizations" )
-                  (.selectpicker {})
-                  )      
+    42 (jquery
+        (fn []
+          (-> (jquery "#organizations" )
+              (.selectpicker {})
+              (.on "change"
+                (fn [e] (
+                  onDropDownChange (.. e -target -id) (.. e -target -value)
+                  )
+                )
               )
-            )  
-        43 (jquery
-            (fn []
-              (-> (jquery "#payrollgroups" )
-                  (.selectpicker {})
-                  )      
+            )      
+          )
+        )  
+    43 (setpayrollgroupsDropDown)
+    44 (jquery
+        (fn []
+          (-> (jquery "#calendars" )
+              (.selectpicker {})
+              (.on "change"
+                (fn [e] (                       
+                  onDropDownChange (.. e -target -id) (.. e -target -value) 
+                  )
+                )
               )
-            )
-        44 (jquery
-            (fn []
-              (-> (jquery "#calendars" )
-                  (.selectpicker {})
-                  )      
-              )
-            )
-        45 (jquery
-            (fn []
-              (-> (jquery "#positions" )
-                  (.selectpicker {})
-                  )      
-              )
-            )
-        50 (setdatepickers)
+            )      
+          )
+        )
+    45 (jquery
+        (fn []
+          (-> (jquery "#positions" )
+              (.selectpicker {})
+              )      
+          )
+        )
+
+
+    46 (jquery
+         (fn []
+           (-> (jquery "#payrollgroups" )
+               (.selectpicker "val" (:payrollgroupid (:employee @app-state)))
+           )
+         )
+       )
+    47 (jquery
+         (fn []
+           (-> (jquery "#organizations" )
+               (.selectpicker "val" (:orgid (:employee @app-state)))
+           )
+         )
+       )
+    50 (setdatepickers)
   )
 )
 
@@ -352,40 +436,44 @@
 )
 
 
-(defn buildPositionsList []
+(defn buildPositionsList [data owner]
   (map
     (fn [text]
-      (dom/option {:key (:positionid text) :data-subtext (:positioncode text)} (:name text))
+      (dom/option {:key (:positionid text) :data-subtext (:positioncode text) :value (:positionid text)
+                    :onChange #(handle-change % owner)} (:name text))
     )
     (:positions @app-state )
   )
 )
 
-(defn buildCalendarsList []
+(defn buildCalendarsList [data owner]
   (map
     (fn [text]
-      (dom/option {:key (:code text) :data-subtext (:countryname text)} (:name text))
+      (dom/option {:key (:code text) :data-subtext (:countryname text) :value (:code text)
+                    :onChange #(handle-change % owner)} (:name text))
     )
     (:calendars @app-state )
   )
 )
 
 
-(defn buildOrganizationsList []
+(defn buildOrganizationsList [data owner]
   ;;(omdom/option #js {:data-subtext "Rep California"} "Tom Foolery")
   (map
     (fn [text]
-      (dom/option {:key (:orgid text) :data-subtext (:orgcode text)} (:orgname text))
+      (dom/option {:key (:orgid text) :data-subtext (:orgcode text) :value (:orgid text)
+                    :onChange #(handle-change % owner)} (:orgname text))
     )
     (:organizations @app-state )
   )
 )
 
 
-(defn buildPayrollGroupsList []
+(defn buildPayrollGroupsList [data owner]
   (map
     (fn [text]
-      (dom/option {:key (:payrollgroupid text) :data-subtext (:payrollgroupid text)} (:name text))
+      (dom/option {:key (:payrollgroupid text) :data-subtext (:payrollgroupid text) :value (:payrollgroupid text)
+                    :onChange #(handle-change % owner)} (:name text))
     )
     (:payrollgroups @app-state )
   )
@@ -393,13 +481,6 @@
 
 
 
-
-(defn handle-change [e owner]
-  (.log js/console (.. e -nativeEvent))
-  (swap! app-state assoc-in [:form (keyword (.. e -nativeEvent -target -id))] 
-    (.. e -target -value)
-  ) 
-)
 
 
 (defn buildMainWrapper [data owner]
@@ -421,13 +502,13 @@
           (dom/div {:className "panel-body"}
             (dom/div {
               :className (if (= (count (:empcode (:form @app-state)) ) 0) "form-group has-error" "form-group")
-              :onChange #(handle-change % owner)
               }
               ;(dom/label  (t (t5pcore/numtolang  (:language (:User @t5pcore/app-state))) my-tconfig :newemp/empcode))
               (dom/input {
                 :id "empcode"
                 :className "form-control"
-                :placeholder (t (t5pcore/numtolang  (:language (:User @t5pcore/app-state))) my-tconfig :newemp/empcode)   }
+                :placeholder (t (t5pcore/numtolang  (:language (:User @t5pcore/app-state))) my-tconfig :newemp/empcode)
+                :defaultValue (:empcode (:employee @app-state))}
               )
             )
 
@@ -460,8 +541,11 @@
               (omdom/select #js {:id "organizations"
                                  :className "selectpicker"
                                  :data-show-subtext "true"
-                                 :data-live-search "true"}                
-                (buildOrganizationsList)
+                                 :data-live-search "true"
+                                 :style {:border-color "#a94442"}
+                                 }
+                (dom/option {:key 0 :data-subtext "" :value 0} "")
+                (buildOrganizationsList data owner)
               )            
             )
 
@@ -476,8 +560,10 @@
               (omdom/select #js {:id "positions"
                                  :className "selectpicker"
                                  :data-show-subtext "true"
-                                 :data-live-search "true"}                
-                (buildPositionsList)
+                                 :data-live-search "true"
+                                 :onChange #(handle-change % owner)
+                                 }                
+                (buildPositionsList data owner)
               )            
             )
 
@@ -492,8 +578,10 @@
               (omdom/select #js {:id "payrollgroups"
                                  :className "selectpicker"
                                  :data-show-subtext "true"
-                                 :data-live-search "true"}                
-                (buildPayrollGroupsList)
+                                 :data-live-search "true"
+                                 :onChange #(handle-change % owner)
+                                 }
+                (buildPayrollGroupsList data owner)
               )            
             )
 
@@ -508,8 +596,10 @@
               (omdom/select #js {:id "calendars"
                                  :className "selectpicker"
                                  :data-show-subtext "true"
-                                 :data-live-search "true"}                
-                (buildCalendarsList)
+                                 :data-live-search "true"
+                                 :onChange #(handle-change % owner)
+                                 }                
+                (buildCalendarsList data owner)
               )            
             )
 
