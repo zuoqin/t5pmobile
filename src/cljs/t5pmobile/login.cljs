@@ -1,4 +1,5 @@
 (ns t5pmobile.login  (:use [net.unit8.tower :only [t]])
+  (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [om.core :as om :include-macros true]
             [om-tools.dom :as dom :include-macros true]
             [om-tools.core :refer-macros [defcomponent]]
@@ -20,12 +21,15 @@
             [t5pmobile.user :as user]
             [t5pmobile.subordinate :as subordinate]
             [t5pmobile.hrmshome :as admin]
+
+            [cljs.core.async :refer [put! dropping-buffer chan take! <!]]
   )
   (:import goog.History)
 )
 
 (enable-console-print!)
 
+(def ch (chan (dropping-buffer 2)))
 (def jquery (js* "$"))
 (def my-tconfig
   {:dev-mode? true
@@ -90,6 +94,40 @@
 (defn error-handler [{:keys [status status-text]}]
   (.log js/console (str "something bad happened: " status " " status-text)))
 
+(defn menus-to-map [menu]
+  (let [     
+      newdata {:menucode (get menu "menucode") :menulevel (get menu "menulevel") :menuopt (get menu "menuopt")
+               :menuorder (get menu "menuorder") :name (get menu "name") :submenu (get menu "submenu")
+               :urltarget (get menu "urltarget")
+               }
+    ]
+    ;(.log js/console newdata)
+    newdata
+  )
+  
+)
+
+
+(defn OnGetSysMenu [response]
+  (let [ 
+    newdata (map menus-to-map response) 
+    ]
+    
+    (swap! t5pcore/app-state assoc-in [:sysmenus]   (into []  newdata) )
+    (swap! admin/app-state assoc-in [:sysmenus]   (into []  newdata) )
+    (.log js/console newdata)
+    (put! ch 45)
+    
+  )
+)
+
+(defn reqsysmenu []
+  (GET (str settings/apipath "api/sysmenu") {:handler OnGetSysMenu
+                                            :error-handler error-handler
+                                            :headers {:content-type "application/json" :Authorization (str "Bearer "  (:token  (first (:token @t5pcore/app-state)))) }
+                                            })
+)
+
 (defn OnGetUser [response]
   (
     let [     
@@ -97,6 +135,7 @@
         :language (get response "language")}
     ]
     (swap! t5pcore/app-state assoc-in [:User] newdata )
+    (reqsysmenu)
   )
 )
 
@@ -108,6 +147,8 @@
     (swap! t5pcore/app-state assoc-in [:Employee] newdata )
   )
 )
+
+
 
 (defn requser []
   (GET (str settings/apipath "api/user") {
@@ -123,6 +164,9 @@
                                             :headers {:content-type "application/json" :Authorization (str "Bearer "  (:token  (first (:token @t5pcore/app-state)))) }
                                             })
 )
+
+
+
 
 (defn OnLogin [response]
   (
@@ -142,7 +186,7 @@
     (swap! t5pcore/app-state assoc-in [:view] 1 )
     (reqemployee)
     (requser)
-    (aset js/window "location" "#/hrms")
+    
 
   )
   
@@ -274,6 +318,35 @@
            {:target (. js/document (getElementById "app"))}))
 
 
+(defn onReceivedMenus []
+  (.log js/console (count (:sysmenus @t5pcore/app-state)))
+  (aset js/window "location" "#/hrms")
+)
+
+(defn setcontrols [value]
+  (case value
+    45 (onReceivedMenus)
+
+    (onReceivedMenus)
+  )
+)
+
+(defn initqueue []
+  (doseq [n (range 1000)]
+    (go ;(while true)
+      (take! ch(
+        fn [v] (
+           ;(setcalculatedfields) 
+           setcontrols v
+           ;.log js/console "Core.ASYNVC working!!!" 
+          )
+        )
+      )
+    )
+  )
+)
+
+(initqueue)
 
 (defn main []
   (-> js/document

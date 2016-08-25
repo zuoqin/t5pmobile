@@ -103,7 +103,8 @@
 
 
 (defn setcontrols []
-  (.log js/console js-object)
+  (.log js/console "Set DataTable called")
+  (.log js/console (count (:employees @app-state)))
       (jquery
        (fn []
          (-> (jquery "#dataTables-example" )
@@ -144,6 +145,13 @@
 
 (initqueue)
 
+(defn UpdateNewEmpDataTable []
+  (.log js/console "Updating DataTable")
+  
+  (put! ch 42)
+)
+
+
 (defn OnGetNewEmployees [response]
   (let [ 
         newdata (map employees-to-map response)
@@ -152,8 +160,8 @@
     (swap! app-state assoc-in [:employees]   (into []  newdata) )
 
     ;(swap! app-state assoc-in [:employees2]   (into []  newdata2) )
-    ;(.log js/console js-object)
-    (put! ch 42)
+    
+    ;(UpdateNewEmpDataTable)
     ;(setcontrols)
 
 
@@ -229,7 +237,6 @@
   )
 )
 
-
 (defn onMount [data]
  
   (swap! app-state assoc-in [:current] 
@@ -239,11 +246,23 @@
 
   (if (= (count (:employees @app-state) )  0)
     (getNewEmployees)
-    (put! ch 42)
+    (UpdateNewEmpDataTable)
   )
 )
 
-
+(defn onDidUpdate []
+   (jquery
+     (fn []
+       (-> (jquery "#side-menu")
+         (.metisMenu)
+       )
+     )
+   )
+   (.log js/console "Update happened") 
+   (if (> (count (:employees @app-state)) 0)
+     (UpdateNewEmpDataTable)
+   )
+)
 
 (defcomponent newemplist-page-view [data owner]
   (did-mount [_]
@@ -251,15 +270,8 @@
   )
   (did-update [this prev-props prev-state]
     ;(.log js/console "Update happened") 
-    (jquery
-      (fn []
-        (-> (jquery "#side-menu")
-          (.metisMenu)
-        )
-      )
-    )
-    (.log js/console "Update happened") 
-
+   (onDidUpdate)
+    
     ;(put! ch 42)
     ;; (if (> (:employees @app-state) 0)
     ;;   (jquery

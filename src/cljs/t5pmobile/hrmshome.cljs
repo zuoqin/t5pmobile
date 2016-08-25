@@ -28,36 +28,6 @@
 )
 
 
-(defn menus-to-map [menu]
-  (let [     
-      newdata {:menucode (get menu "menucode") :menulevel (get menu "menulevel") :menuopt (get menu "menuopt")
-               :menuorder (get menu "menuorder") :name (get menu "name") :submenu (get menu "submenu")}
-    ]
-    ;(.log js/console newdata)
-    newdata
-  )
-  
-)
-
-(defn OnGetSysMenu [response]
-  (let [ 
-    newdata (map menus-to-map response)
-    ]
-    (swap! app-state assoc-in [:sysmenus]   (into []  newdata) )
-    ;(.log js/console newdata)
-  )
-)
-
-
-(defn getSysMenus []
-  (GET (str settings/apipath "api/sysmenu") {
-    :handler OnGetSysMenu
-    :error-handler error-handler
-    :headers {
-      :content-type "application/json"
-      :Authorization (str "Bearer "  (:token  (first (:token @app-state)))) }
-  })
-)
 
 (defn buildSysMenuLevel2 [data]
   (map (fn [text]
@@ -147,11 +117,13 @@
 )
 
 (defn onMount [data]
+  (.log js/console "OnMount HRMS Home")
+  (.log js/console (count (:sysmenus @app-state)))
   (swap! app-state assoc-in [:current] 
        (t (t5pcore/numtolang  (:language (:User @t5pcore/app-state))) t5pcore/my-tconfig :mainmenu/hrms)
   )
-
-  (getSysMenus)
+  ;(swap! app-state assoc-in [:sysmenus] (:sysmenus @t5pcore/app-state))
+  ;(getSysMenus)
 )
 
 
@@ -162,7 +134,7 @@
   (render [_]
     (dom/div
       (om/build t5pcore/website-view data {})
-      (dom/h1 {:style {:margin-top "100px"}} "About Page")
+      ;(dom/h1 {:style {:margin-top "100px"}} "About Page")
       ;(displaySideBarBlock data)
     )
   )

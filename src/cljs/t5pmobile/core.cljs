@@ -228,12 +228,17 @@
             "Forms"
           )          
         )
-        (displaySystemMenuBlock data)
+        (if (> (count (:sysmenus @app-state)) 0)
+          (displaySystemMenuBlock data)
+        )
       )
     )
   )
 )
 
+(defn doLogout [data]
+  (swap! data assoc-in [:view]   0 )
+)
 
 (defn displayUserSettingsBlock [data]
   (dom/li {:className "dropdown"}
@@ -256,7 +261,7 @@
       )
       (dom/li {:className "divider"})
       (dom/li
-        (dom/a {:href "#/login"} 
+        (dom/a {:href "#/login" :onClick (fn [e](doLogout data))} 
           (dom/i {:className "fa fa-sign-out fa-fw"})
           "Logout"
         )
@@ -321,12 +326,16 @@
 
 
 (defn onMount [data]
- 
+  (.log js/console "onMount core") 
   (swap! app-state assoc-in [:current] 
        (t (numtolang  (:language (:User @app-state))) my-tconfig :mainmenu/hrms)
   )
-  (if (< (count (:sysmenus @app-state)) 1)
-    (getSysMenus)  
+  (if 
+    ( and
+      (= (count (:sysmenus @app-state)) 0)
+      (> (count (:token @app-state)) 0)
+    )
+    (getSysMenus)
   )
   
   (jquery
@@ -338,14 +347,8 @@
   )
 )
 
-
-
-(defcomponent hrms-navigation-view [data owner]
-  (did-mount [_]
-    (onMount data)
-  )
-  (did-update [this prev-props prev-state]
-    ;(.log js/console "Update happened") 
+(defn onDidUpdate [data]
+    (.log js/console "Update Core happened") 
     (jquery
       (fn []
         (-> (jquery "#side-menu")
@@ -353,6 +356,15 @@
         )
       )
     )
+
+)
+
+(defcomponent hrms-navigation-view [data owner]
+  (did-mount [_]
+    (onMount data)
+  )
+  (did-update [this prev-props prev-state]
+    onDidUpdate data
   )
   (render [_]
     (let [style {:style {:margin "10px" :padding-bottom "0px"}}

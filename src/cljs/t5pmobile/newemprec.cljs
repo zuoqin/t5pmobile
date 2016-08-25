@@ -1,5 +1,5 @@
 (ns t5pmobile.newemprec (:use [net.unit8.tower :only [t]])
-    (:require-macros [cljs.core.async.macros :refer [go]])
+  (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [om.core :as om :include-macros true]
             [om-tools.dom :as dom :include-macros true]
             [om-tools.core :refer-macros [defcomponent]]
@@ -99,6 +99,7 @@
     ]
     (swap! app-state assoc-in [:employee]  newdata )
     (swap! app-state assoc-in [:form :empcode]  (:empcode newdata )  )
+    (swap! app-state assoc-in [:form :payrollgroupid]  (:payrollgrouid newdata )  )
     ;; (if (> (count (:payrollgroups @app-state)) 0)
     ;;   (jquery
     ;;     (fn []
@@ -120,6 +121,7 @@
 
 (defn setdatepickers []
   (let [custom-formatter2  (tf/formatter (:datemask (:User @t5pcore/app-state)) )] 
+
     (jquery
       (fn []
         (-> (jquery (str "#hiredate") )
@@ -182,6 +184,7 @@
 
 (defn setpayrollgroupsDropDown []
   (put! ch 46) 
+  (.log js/console (count (:payrollgroups @app-state)) )
   (jquery
     (fn []
       (-> (jquery "#payrollgroups" )
@@ -199,11 +202,11 @@
 )
 
 (defn setorganizationsDropDown []
-  (put! ch 46) 
+  (put! ch 47) 
   (jquery
     (fn []
       (-> (jquery "#organizations" )
-        (.selectpicker {})
+        (.selectpicker {:noneSelectedText "your none beautiful text"})
         (.on "change"
           (fn [e]
             (
@@ -217,21 +220,61 @@
 )
 
 
+(defn setpositionsDropDown []
+  (put! ch 48) 
+  ;(.log js/console (count (:positions @app-state)) )
+  (jquery
+    (fn []
+      (-> (jquery "#positions" )
+        (.selectpicker {})
+        (.on "change"
+          (fn [e]
+            (
+              onDropDownChange (.. e -target -id) (.. e -target -value)
+            )
+          )
+        )
+      )
+    )
+  )
+)
+
+(defn setcalendarsDropDown []
+  (put! ch 48) 
+  ;(.log js/console (count (:positions @app-state)) )
+  (jquery
+    (fn []
+      (-> (jquery "#calendars" )
+        (.selectpicker {})
+        (.on "change"
+          (fn [e]
+            (
+              onDropDownChange (.. e -target -id) (.. e -target -value)
+            )
+          )
+        )
+      )
+    )
+  )
+)
+
+(defn setallDropDowns []
+  (setpayrollgroupsDropDown)
+  (setorganizationsDropDown)
+  (setcalendarsDropDown)
+  (setpositionsDropDown)
+  (jquery
+    (fn []
+      (-> (jquery "#side-menu")
+        (.metisMenu)
+      )
+    )
+  )
+)
+
 (defn setcontrols [value]
   (case value
-    42 (jquery
-        (fn []
-          (-> (jquery "#organizations" )
-              (.selectpicker {})
-              (.on "change"
-                (fn [e] (
-                  onDropDownChange (.. e -target -id) (.. e -target -value)
-                  )
-                )
-              )
-            )      
-          )
-        )  
+    42 (setorganizationsDropDown)
     43 (setpayrollgroupsDropDown)
     44 (jquery
         (fn []
@@ -269,7 +312,15 @@
            )
          )
        )
+    48 (jquery
+         (fn []
+           (-> (jquery "#calendars" )
+               (.selectpicker "val" (:calendar (:employee @app-state)))
+           )
+         )
+       )
     50 (setdatepickers)
+    51 (setallDropDowns)
   )
 )
 
@@ -381,6 +432,7 @@
     newdata (map payrollgroups-to-map response)
     ]
     (swap! app-state assoc-in [:payrollgroups]  (into [] newdata) )
+    (.log js/console "Received payroll groups list in newEmpRec")
     (put! ch 43)
   )
 )
@@ -543,6 +595,7 @@
                                  :data-show-subtext "true"
                                  :data-live-search "true"
                                  :style {:border-color "#a94442"}
+                                 :data-none-selected-text "To be selected"
                                  }
                 (dom/option {:key 0 :data-subtext "" :value 0} "")
                 (buildOrganizationsList data owner)
@@ -613,7 +666,7 @@
 
 
 (defn onMount [data]
- 
+  (.log js/console "On Mount NewEmpRec")
   (swap! app-state assoc-in [:current] 
        (t (t5pcore/numtolang  (:language (:User @t5pcore/app-state))) my-tconfig :mainmenu/newemprec)
   )
@@ -641,34 +694,47 @@
   )
 
   (put! ch 50)   ;;setdatepickers 
+
 )
 
-
-
-(defn newemprec-page-view [data owner]
-
-  ;; (did-update [this prev-props prev-state]
-  ;;   ;(.log js/console "Update happened") 
-  ;;   (jquery
-  ;;     (fn []
-  ;;       (-> (jquery "#side-menu")
-  ;;         (.metisMenu)
-  ;;       )
+(defn onDidMount []
+  ;(.log js/console "Update NewEmpRec happened") 
+  ;; (jquery
+  ;;   (fn []
+  ;;     (-> (jquery "#side-menu")
+  ;;       (.metisMenu)
   ;;     )
   ;;   )
-  ;;   (.log js/console "Update happened") 
   ;; )
+  (put! ch 51)
+  (.log js/console "Did mount newempRec happened") 
+)
+
+(defn newemprec-page-view [data owner]
 
   (reify
     om/IWillMount
     (will-mount [_]
       (onMount data)
     )
+    om/IDidMount
+    (did-mount [_]
+      (onDidMount) 
+    )
     om/IRender
     (render [_]
       (dom/div
         (om/build t5pcore/website-view data {})
-        (buildMainWrapper data owner)
+        (if (and
+              (> (count (:organizations @app-state)) 0)
+              (> (count (:calendars @app-state)) 0)
+              (> (count (:payrollgroups @app-state)) 0)
+              (> (count (:positions @app-state)) 0)
+              (> (count (:employee @app-state)) 0)
+            )
+          (buildMainWrapper data owner)
+        )
+        
       )
     )
   )

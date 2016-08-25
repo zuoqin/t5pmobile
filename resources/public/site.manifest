@@ -9,6 +9,12 @@ CACHE:
 fonts/glyphicons-halflings-regular.woff2
 fonts/glyphicons-halflings-regular.ttf
 fonts/glyphicons-halflings-regular.woff
+fonts/FontAwesome.otf
+fonts/fontawesome-webfont.eot
+fonts/fontawesome-webfont.svg
+fonts/fontawesome-webfont.ttf
+fonts/fontawesome-webfont.woff
+
 
 /css/bootstrap-theme.min.css
 /css/bootstrap-theme.min.css.map
@@ -17,11 +23,38 @@ fonts/glyphicons-halflings-regular.woff
 /css/jquery.timepicker.css
 /css/style.css
 
+/css/bootstrap-select.min.css
+/css/dataTables.bootstrap.css
+/css/dataTables.responsive.css
+/css/font-awesome.min.css
+/css/metisMenu.min.css
+/css/morris.css
+/css/sb-admin-2.css
+/css/timeline.css
+/css/bootstrap-datepicker3.min.css
+/css/bootstrap-datepicker3.min.css.map
 
-/javascript/jquery-3.1.0.min.js
+
+
+
+/javascript/jquery.min.js
 /javascript/bootstrap.min.js
 /javascript/bootstrap-datepicker.min.js
 /javascript/jquery.timepicker.min.js
+
+/javascript/bootstrap-select.min.js
+/javascript/dataTables.bootstrap.min.js
+/javascript/dataTables.responsive.js
+/javascript/flot-data.js
+/javascript/jquery.dataTables.min.js
+/javascript/metisMenu.min.js
+/javascript/morris.min.js
+/javascript/morris-data.js
+/javascript/raphael-min.js
+/javascript/sb-admin-2.js
+
+
+
 
 /images/LogonBack.jpg
 
