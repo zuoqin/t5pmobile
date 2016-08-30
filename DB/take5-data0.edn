@@ -1,0 +1,32 @@
+[
+
+{:organization/english "Take5People", :organization/chinese "五人易软件（上海）有限公司", :db/id #db/id[:db.part/user -1000001]}
+{:organization/english "Lifemall", :organization/chinese "淘最生活电子商务（上海）有限公司", :db/id #db/id[:db.part/user -1000002]}
+
+
+{:position/english "IT Director", :organization/chinese "技术总监", :db/id #db/id[:db.part/user -1000003], :position/organization #db/id[:db.part/user -1000002]}
+
+{:position/english "Senior Software Engineer", :organization/chinese "高级软件工程师", :position/organization #db/id[:db.part/user -1000001] :db/id #db/id[:db.part/user -1000004]}
+
+
+
+{:db/id #db/id[:db.part/user -1000005], :employee/english "Alexey Zorchenkov", :employee/chinese "左勤"
+:employee/positions[  #db/id[:db.part/user -1000003] ]
+}
+
+
+{:db/id #db/id[:db.part/user -1000006], :employee/english "Mack Liu", :employee/chinese "刘小牛"
+:employee/positions[  #db/id[:db.part/user -1000004] ]
+}
+
+
+{:user/code "zuoqin", :user/password "Qwerty123",
+:user/employee #db/id[:db.part/user -1000005], :db/id #db/id[:db.part/user -1000007]
+}
+
+
+{:user/code "beesdata", :user/password "Qwerty123",
+:user/employee #db/id[:db.part/user -1000006], :db/id #db/id[:db.part/user -1000008]
+}
+
+]

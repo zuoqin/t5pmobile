@@ -710,6 +710,20 @@
   (.log js/console "Did mount newempRec happened") 
 )
 
+(defn onDidUpdate []
+  ;(.log js/console "Update NewEmpRec happened") 
+  ;; (jquery
+  ;;   (fn []
+  ;;     (-> (jquery "#side-menu")
+  ;;       (.metisMenu)
+  ;;     )
+  ;;   )
+  ;; )
+  (put! ch 51)
+  (.log js/console "Did update newempRec happened") 
+)
+
+
 (defn newemprec-page-view [data owner]
 
   (reify
@@ -720,6 +734,10 @@
     om/IDidMount
     (did-mount [_]
       (onDidMount) 
+    )
+    om/IDidUpdate
+    (did-update [_ _ _]
+      (onDidUpdate) 
     )
     om/IRender
     (render [_]

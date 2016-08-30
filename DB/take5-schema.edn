@@ -1,0 +1,106 @@
+[
+ ;; user
+ {:db/id #db/id[:db.part/db]
+  :db/ident :user/code
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/fulltext true
+  :db/doc "A user's login"
+  :db.install/_attribute :db.part/db}
+
+ {:db/id #db/id[:db.part/db]
+  :db/ident :user/password
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/doc "A user's password"
+  :db.install/_attribute :db.part/db}
+
+ {:db/id #db/id[:db.part/db]
+  :db/ident :user/employee
+  :db/valueType :db.type/ref
+  :db/cardinality :db.cardinality/one
+  :db/doc "A user's employee"
+  :db.install/_attribute :db.part/db}
+
+ ;; employee
+ {:db/id #db/id[:db.part/db]
+  :db/ident :employee/empid
+  :db/valueType :db.type/long
+  :db/cardinality :db.cardinality/one
+  :db/unique :db.unique/identity
+  :db/doc "A unique employee identificator"
+  :db.install/_attribute :db.part/db}
+
+ {:db/id #db/id[:db.part/db]
+  :db/ident :employee/english
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/doc "A employee english name"
+  :db.install/_attribute :db.part/db}
+
+
+ {:db/id #db/id[:db.part/db]
+  :db/ident :employee/chinese
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/doc "A employee chinese name"
+  :db.install/_attribute :db.part/db}
+  
+ {:db/id #db/id[:db.part/db]
+  :db/ident :employee/positions
+  :db/valueType :db.type/ref
+  :db/cardinality :db.cardinality/many
+  :db/doc "Positions hold by employee"
+  :db.install/_attribute :db.part/db}
+
+
+;; position
+ {:db/id #db/id[:db.part/db]
+  :db/ident :position/organization
+  :db/valueType :db.type/ref
+  :db/cardinality :db.cardinality/one
+  :db/doc "Organization which has budget for this position"
+  :db.install/_attribute :db.part/db}
+
+ {:db/id #db/id[:db.part/db]
+  :db/ident :position/english
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/doc "Position english title"
+  :db.install/_attribute :db.part/db}
+
+ {:db/id #db/id[:db.part/db]
+  :db/ident :position/chinese
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/doc "Position chinese title"
+  :db.install/_attribute :db.part/db}
+
+
+;; organization
+ {:db/id #db/id[:db.part/db]
+  :db/ident :organization/orgid
+  :db/valueType :db.type/long
+  :db/unique :db.unique/identity
+  :db/cardinality :db.cardinality/one
+  :db/doc "Organization identifier"
+  :db.install/_attribute :db.part/db}
+
+ {:db/id #db/id[:db.part/db]
+  :db/ident :organization/english
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/doc "An organization english name"
+  :db.install/_attribute :db.part/db}
+
+ {:db/id #db/id[:db.part/db]
+  :db/ident :organization/chinese
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/doc "An organization chinese name"
+  :db.install/_attribute :db.part/db}
+
+
+
+
+ ]

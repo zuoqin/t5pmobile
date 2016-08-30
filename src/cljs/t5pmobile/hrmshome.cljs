@@ -148,15 +148,16 @@
            app-state
            {:target (. js/document (getElementById "app"))}))
 
-(defn main []
-  (-> js/document
-      .-location
-      (set! "#/hrms"))
+;; (defn main []
+;;   (-> js/document
+;;       .-location
+;;       (set! "#/hrms"))
 
-  ;(aset js/window "location" "#/login")
-)
+;;   ;(aset js/window "location" "#/login")
+;; )
   
-(main)
+;(main)
+
 
 
 

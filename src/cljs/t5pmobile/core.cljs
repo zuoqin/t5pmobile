@@ -546,7 +546,7 @@
       .-location
       (set! "#/"))
 
-  (aset js/window "location" "#/hrms")
+  (aset js/window "location" "#/login")
 )
   
 ;(main)

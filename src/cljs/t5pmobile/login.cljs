@@ -250,6 +250,9 @@
     (.log js/console "starting login screen" ) 
     
   )
+  (did-mount [_]
+    (.focus (om/get-node owner "txtUserName" ))
+  )
   (render
     [_]
     (dom/div {:className "container"}
@@ -258,7 +261,7 @@
       (dom/img {:src "images/LogonBack.jpg" :className "img-responsive company-logo-logon"})
       (dom/form {:className "form-signin"}
         (dom/input #js {:type "text" :ref "txtUserName"
-           :defaultValue  settings/demouser  :className "form-control" :placeholder "User Name"} )
+           :defaultValue  settings/demouser  :className "form-control" :placeholder "User Name" } )
         (dom/input {:className "form-control" :ref "txtPassword" :id "txtPassword"
            :defaultValue settings/demopassword :type "password"  :placeholder "Password"} )
         (dom/button #js {:className "btn btn-lg btn-primary btn-block" :type "button" :onClick (fn [e](checklogin owner))} "Login")
