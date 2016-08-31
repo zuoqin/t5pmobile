@@ -26,6 +26,11 @@ let main argv =
     id <- Processor.crud.PostAndReply( fun reply -> Processor.ExportOrganizations(OutputFile, id, reply) )
 
     id <- Processor.crud.PostAndReply( fun reply -> Processor.ExportPositions(OutputFile, id, reply) )
+
+
+    id <- Processor.crud.PostAndReply( fun reply -> Processor.ExportEmployees(OutputFile, id, reply) )
+
+
     Console.WriteLine(organizationsmap.Count)
     let outFile = new StreamWriter(OutputFile, true)
     outFile.WriteLine( sprintf "]")
