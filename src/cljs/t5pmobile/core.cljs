@@ -33,6 +33,7 @@
           :settings "Settings"
           :hrms "HRMS"
           :newemplist "New Employee List"
+          :payrollcalculation "Payroll Calculation"
         }
         :missing  "<Missing translation: [%1$s %2$s %3$s]>"
       }
@@ -48,7 +49,7 @@
           :settings "设置"
           :hrms "人力资源管理系统"
           :newemplist "新员工列表"
-          
+          :payrollcalculation "薪资及所得税计算"
         }
       }
     }

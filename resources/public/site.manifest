@@ -33,7 +33,8 @@ fonts/fontawesome-webfont.woff
 /css/timeline.css
 /css/bootstrap-datepicker3.min.css
 /css/bootstrap-datepicker3.min.css.map
-
+/css/jquery.dataTables.min.css
+/css/select.dataTables.min.css
 
 
 
@@ -52,7 +53,7 @@ fonts/fontawesome-webfont.woff
 /javascript/morris-data.js
 /javascript/raphael-min.js
 /javascript/sb-admin-2.js
-
+/javascript/dataTables.select.min.js
 
 
 
