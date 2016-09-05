@@ -238,7 +238,7 @@
 )
 
 (defn doLogout [data]
-  (swap! data assoc-in [:view]   0 )
+  (swap! app-state assoc-in [:view]   0 )
 )
 
 (defn displayUserSettingsBlock [data]
@@ -479,7 +479,7 @@
 (defcomponent logout-view [_ _]
   (render
    [_]
-   (let [style {:style {:margin "10px;"}}]
+   (let [style {:style {:margin "10px"}}]
      (dom/div style
        (dom/a (assoc style :href "#/login") 
               "Login"
@@ -495,6 +495,7 @@
   (
     fn [data _]
       (:view (if (= data nil) @app-state @data ))
+      ;;(:view @app-state )
   )
 )
 

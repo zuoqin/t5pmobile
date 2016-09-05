@@ -98,7 +98,7 @@
   )
   (render
   [_]
-    (let [style {:style {:margin "10px;" :padding-bottom "0px;"}}
+    (let [style {:style {:margin "10px" :padding-bottom "0px"}}
       styleprimary {:style {:margin-top "70px"}}
       ]
       (dom/div

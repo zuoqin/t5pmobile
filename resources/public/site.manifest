@@ -58,6 +58,11 @@ fonts/fontawesome-webfont.woff
 
 
 /images/LogonBack.jpg
+/images/loginbackground.png
+/images/loader.gif
+/images/sort_desc.png
+/images/sort_asc.png
+/images/sort_both.png
 
 NETWORK:
 *

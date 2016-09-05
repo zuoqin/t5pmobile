@@ -10,6 +10,9 @@
             [t5pmobile.settings :as settings]
             [ajax.core :refer [GET POST]]
 
+            [om-bootstrap.button :as b]
+            [om-bootstrap.panel :as p]
+
             [cljs.core.async :refer [put! dropping-buffer chan take! <!]]
             
   )
@@ -67,7 +70,7 @@
 )
 
 
-(defonce app-state (atom  {:view 2  :current "Salary and Income Tax Calculation"} ))
+(defonce app-state (atom  {:view 2  :state 0 :current "Salary and Income Tax Calculation"} ))
 (def jquery (js* "$"))
 
 
@@ -159,6 +162,7 @@
 
 (defn setcontrols []
   (.log js/console "In set controls")
+  (swap! app-state assoc-in [:state] 1 )
   (jquery
     (fn []
       (-> (jquery "#dataTables-example" )
@@ -246,6 +250,91 @@
   )
 )
 
+(def js-selectobject  (clj->js
+  {
+    :selected true
+  }
+))
+
+
+(defn datatablerow-to-payrollgroup [row]
+  (.log js/console (nth row 1))
+  (nth row 1)
+)
+
+
+(defn setSelectedPayrollGroups [selection]
+  (let [ 
+        newdata (map datatablerow-to-payrollgroup selection)
+    ]
+    (swap! app-state assoc-in [:selectedpayrollgroups] newdata )
+    (dorun newdata  ) 
+  )
+)
+
+
+
+(defn calculateEmployees []
+  (let [
+    params  (clj->js  { :selected true }  )
+    table (-> (jquery "#dataTables-example")
+                  (.DataTable)   
+                  )
+        jsdata (.data (.rows table params) )
+        data (js->clj (.toArray jsdata))
+    ]
+    (.log js/console (.stringify js/JSON (clj->js (.toArray jsdata)) nil 2))
+    (setSelectedPayrollGroups data )
+  )
+
+)
+
+
+(defn addModal []
+   (dom/div
+
+   ;(b/button {:type "button" :className "btn btn-info btn-lg" :data-toggle "modal" :data-target "#myModal"} "Open Modal")
+           (dom/div {:id "leaveModal" :className "modal fade" :role "dialog"}
+                    (dom/div {:className "modal-dialog"} 
+                             ;;Modal content
+                             (dom/div {:className "modal-content"} 
+                                      (dom/div {:className "modal-header"} 
+                                               (b/button {:type "button" :className "close" :data-dismiss "modal"})
+                                               (dom/h4 {:className "modal-title"} (:modalTitle @app-state) )
+                                               )
+                                      (dom/div {:className "modal-body"}
+                                               (dom/p (:modalText @app-state))
+                                               )
+                                      (dom/div {:className "modal-footer"}
+                                               (b/button {:type "button" :className "btn btn-default" :data-dismiss "modal"} "Close")
+                                               )
+                                      )
+                             )
+                    )
+            
+           (dom/div
+
+            ( b/button {:bs-style "primary"
+                        :onClick (fn [e](calculateEmployees))
+                        :disabled? (not= true  true)  } "Submit")
+            )   
+   )
+
+)
+
+(defn buildLoadingWrapper [data]
+  (dom/div {:id "page-wrapper"}
+    (dom/div {:className "row"}
+      (dom/div {:className "col-lg-12"}
+        (dom/img {:src "/images/loader.gif"})
+      )
+    )
+
+
+  )
+  
+)
+
 (defn buildMainWrapper [data]
   (dom/div {:id "page-wrapper"}
     (dom/div {:className "row"}
@@ -253,7 +342,7 @@
         (dom/h1 {:className "page-header"} "Salary and Income Tax Calculation")
       )
     )
-
+    
     (dom/div {:className "row"}
       (dom/div {:className "col-lg-12"}
         (dom/div {:className "panel panel-default"}
@@ -292,8 +381,9 @@
         )
       )
     )
-  
+    (addModal)
   )
+  
 )
 
 (defn onMount [data]
@@ -317,9 +407,11 @@
        )
      )
    )
-   (.log js/console "Update happened") 
+   (.log js/console (str "Update happened state =" (:state @app-state) " payrollgroups count = " (count (:payrollgroups @app-state))) ) 
    (if (> (count (:payrollgroups @app-state)) 0)
-     (UpdatePayrollGroupsDataTable)
+     (if (= (:state @app-state) 0)
+       (UpdatePayrollGroupsDataTable) 
+     )
    )
 )
 
@@ -336,6 +428,7 @@
       (om/build t5pcore/website-view data {})
       (if (> (count (:payrollgroups @app-state)) 0 )
         (buildMainWrapper data)
+        (buildLoadingWrapper data)
       )
       
     )

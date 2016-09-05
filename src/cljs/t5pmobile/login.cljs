@@ -52,7 +52,7 @@
 (t :en    my-tconfig :example/foo)
 (t :en    my-tconfig :example/greeting "Steve")
 
-(defonce app-state (atom  {:error "" :modalText "Modal Text" :modalTitle "Modal Title"} ))
+(defonce app-state (atom  {:error "" :modalText "Modal Text" :modalTitle "Modal Title" :state 0} ))
 
 
 (defn setLoginError [error]
@@ -67,6 +67,9 @@
   (swap! app-state assoc-in [:modalText] 
     (str (:error error))
   ) 
+
+  (swap! app-state assoc-in [:state] 0) 
+ 
   ;;(.log js/console (str  "In setLoginError" (:error error) ))
   (jquery
     (fn []
@@ -181,7 +184,6 @@
 
     (.log js/console (str newdata))
     ;;(.log js/console (str (select-keys (js->clj response) [:Title :Reference :Introduction])  ))    
-    ;(swap! app-state assoc-in pageid newdata )
     (swap! t5pcore/app-state assoc-in [:token] newdata )
     (swap! t5pcore/app-state assoc-in [:view] 1 )
     (reqemployee)
@@ -203,6 +205,7 @@
                                             :headers {:content-type "application/x-www-form-urlencoded"}
                                             :body (str "grant_type=password&username=" username "&password=" password) 
                                             })
+  (swap! app-state assoc-in [:state] 2)
 )
 
 
@@ -255,18 +258,21 @@
   )
   (render
     [_]
-    (dom/div {:className "container"}
+    (dom/div {:className "container" :style {:width "100%" :padding-top "283px" :backgroundImage "url(/images/loginbackground.png)" :backgroundSize "cover"}  }
       ;(om/build t5pcore/website-view data {})
       ;(dom/h1 "Login Page")
-      (dom/img {:src "images/LogonBack.jpg" :className "img-responsive company-logo-logon"})
+      ;(dom/img {:src "images/LogonBack.jpg" :className "img-responsive company-logo-logon"})
       (dom/form {:className "form-signin"}
         (dom/input #js {:type "text" :ref "txtUserName"
            :defaultValue  settings/demouser  :className "form-control" :placeholder "User Name" } )
         (dom/input {:className "form-control" :ref "txtPassword" :id "txtPassword"
            :defaultValue settings/demopassword :type "password"  :placeholder "Password"} )
-        (dom/button #js {:className "btn btn-lg btn-primary btn-block" :type "button" :onClick (fn [e](checklogin owner))} "Login")
+        (dom/button #js {
+          :className (if (= (:state @app-state) 0) "btn btn-lg btn-primary btn-block" "btn btn-lg btn-primary btn-block m-progress" )  :type "button" :onClick (fn [e](checklogin owner))} "Login")
+        
       )
       (addModal)
+      (dom/div {:style {:margin-bottom "200px"}})
     )
   )
 )
@@ -323,6 +329,7 @@
 
 (defn onReceivedMenus []
   (.log js/console (count (:sysmenus @t5pcore/app-state)))
+  (swap! app-state assoc-in [:state] 0 )
   (aset js/window "location" "#/hrms")
 )
 
