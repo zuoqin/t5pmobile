@@ -21,7 +21,7 @@
 (enable-console-print!)
 
 
-(defonce app-state (atom  {:forminstanceid 0  :current "My Application"} ))
+(defonce app-state (atom  {:forminstanceid 0 :view 1  :current "My Application"} ))
 
 
 (defn array-to-string [element]
@@ -112,17 +112,17 @@
               )
               (dom/h5 "提交时间:2016/08/01 13:42:29")
               (dom/dl {:className "dl-horizontal leaveRecipients"}
-                (dom/dt {:text-align "left"}
+                (dom/dt 
                   (dom/small "开始日期: ")
                 )
                 (dom/dd "2016/08/06")
 
-                (dom/dt {:text-align "left"}
+                (dom/dt 
                   (dom/small "结束日期: : ")
                 )
                 (dom/dd "2016/08/08")
 
-                (dom/dt {:text-align "left"}
+                (dom/dt 
                   (dom/small "天数 : ")
                 )
                 (dom/dd "1")
