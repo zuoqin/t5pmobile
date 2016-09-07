@@ -12,6 +12,7 @@
             [t5pmobile.newemplist :as newemplist]
             [t5pmobile.newemprec :as newemprec]
             [t5pmobile.payrollcalculation :as payrollcalculation]
+            [t5pmobile.payrolledit :as payrolledit]
             
   )
   (:import goog.History)

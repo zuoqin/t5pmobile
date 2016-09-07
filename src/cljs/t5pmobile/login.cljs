@@ -330,7 +330,7 @@
 (defn onReceivedMenus []
   (.log js/console (count (:sysmenus @t5pcore/app-state)))
   (swap! app-state assoc-in [:state] 0 )
-  (aset js/window "location" "#/hrms")
+  (aset js/window "location" "#/eportal")
 )
 
 (defn setcontrols [value]

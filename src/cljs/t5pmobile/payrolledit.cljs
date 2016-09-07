@@ -1,4 +1,4 @@
-(ns t5pmobile.payrollcalculation (:use [net.unit8.tower :only [t]])
+(ns t5pmobile.payrolledit (:use [net.unit8.tower :only [t]])
     (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [om.core :as om :include-macros true]
             [om-tools.dom :as dom :include-macros true]
@@ -8,7 +8,7 @@
             [goog.history.EventType :as EventType]
             [t5pmobile.core :as t5pcore]
             [t5pmobile.settings :as settings]
-            [ajax.core :refer [GET POST PUT]]
+            [ajax.core :refer [GET POST]]
 
             [om-bootstrap.button :as b]
             [om-bootstrap.panel :as p]
@@ -30,8 +30,6 @@
       :en{
         :payrollgroupslist{
           :payrollgroupid "#"
-          :employee "employee"
-          :value "value"
           :pay_curyear "pay_curyear"
           :name "Name"
           :begindate "begindate"
@@ -50,8 +48,6 @@
       }
       :cn{
         :payrollgroupslist{
-          :employee "员工"
-          :value "薪资"
           :payrollgroupid "号码"
           :pay_curyear "pay_curyear"
           :name "Name"
@@ -74,26 +70,13 @@
 )
 
 
-(defonce app-state (atom  {:view 2 :empcount 0 :state 0 :calculate 0 :current "Salary and Income Tax Calculation"} ))
+(defonce app-state (atom  {:view 2  :state 0 :current "Salary and Income Tax Calculation"} ))
 (def jquery (js* "$"))
 
 
 
 (defn error-handler [{:keys [status status-text]}]
   (.log js/console (str "something bad happened: " status " " status-text))
-  (swap! app-state assoc-in [:calculate] 0 )
-)
-
-
-(defn calculation-results--to-map [result]
-  (let [     
-      newdata {
-        :name (get result "name") 
-        :value (get result "value")
-      }
-    ]
-    newdata
-  )
 )
 
 
@@ -113,22 +96,6 @@
   )
   
 )
-
-(def js-results-object  (clj->js
-  {
-    :autoWidth false
-    :columnDefs
-    [
-      { :width "50%" 
-        :targets 0
-      }
-      { :className "dt-body-right"
-        :targets [1]
-      }
-    ]
-    :lengthMenu [[10, 20, 50, -1], [10, 20, 50, "All"]]
-  }
-))
 
 (def js-object  (clj->js
   {
@@ -193,33 +160,28 @@
 )
 
 
-(defn setPayrollGroupsTable []
+(defn setcontrols []
+  (.log js/console "In set controls")
   (swap! app-state assoc-in [:state] 1 )
   (jquery
     (fn []
       (-> (jquery "#dataTables-example" )
         (.DataTable js-object)
-      )    
+        (.on "click" "tr"
+          (fn [e] (
+            let [table (-> (jquery "#dataTables-example")
+                              (.DataTable)   
+                            )
+                 res (.data (.row table (.. e -currentTarget)) )
+
+
+            ]
+            (gotoSelection (first res)) 
+            )
+          )
+        )
+      )      
     )
-  )
-)
-
-
-(defn setResultsTable []
-  (swap! app-state assoc-in [:state] 3 )
-  (jquery
-    (fn []
-      (-> (jquery "#dataTables-results" )
-        (.DataTable js-results-object)
-      )    
-    )
-  )
-)
-
-(defn setcontrols [value]
-  (case value
-    42 (setPayrollGroupsTable)
-    43 (setResultsTable)
   )
 )
 
@@ -228,7 +190,7 @@
     (go
       (take! ch(
         fn [v] ( 
-           setcontrols v
+           setcontrols 
           )
         )
       )
@@ -239,85 +201,11 @@
 (initqueue)
 
 (defn UpdatePayrollGroupsDataTable []
-  (.log js/console "Updating PayrollGroups DataTable")
+  (.log js/console "Updating DataTable")
   
   (put! ch 42)
 )
 
-(defn UpdateResultsDataTable []
-  (.log js/console "Updating Results DataTable")
-  
-  (put! ch 43)
-)
-
-
-(defn displayCalculateModal []
-  (swap! app-state assoc-in [:modalTitle] 
-    (str "Salary and tax calculation")
-  ) 
-
-  (swap! app-state assoc-in [:modalText] 
-    (str "Are you sure to calculate salaries for " (:empcount @app-state) " employees?")
-  )
-
-  (jquery
-    (fn []
-      (-> (jquery "#calculateModal")
-        (.modal)
-      )
-    )
-  )
-)
-
-(defn OnGetEmployeesCount [response]
-  (
-    (swap! app-state assoc-in [:empcount] (js/parseInt response) )
-    (displayCalculateModal)
-  )
-  
-)
-
-(defn hideCalculateModal []
-  (jquery
-    (fn []
-      (-> (jquery "#calculateModal")
-        (.modal "hide")
-      )
-    )
-  )
-)
-
-
-(defn OnCalculateResults [response]
-  (let [ 
-        newdata (map calculation-results--to-map response)
-    ]
-    (swap! app-state assoc-in [:calculationresults]   (into []  newdata) )
-    (swap! app-state assoc-in [:calculate] 0 )
-    (hideCalculateModal)
-    ;;(put! ch 43)
-  )
-)
-
-
-(defn getCalculatePayrollResults [processid]
-  (
-    (swap! app-state assoc-in [:calculate] 1 )
-    (GET (str settings/apipath  "api/payroll?processid=" processid) {
-      :handler OnCalculateResults
-      :error-handler error-handler
-      :headers {
-        :content-type "application/json"
-        :Authorization (str "Bearer "  (:token  (first (:token @t5pcore/app-state)))) }
-      }
-    )
-  )
-)
-
-
-(defn OnCalculatePayroll [response]
-  (getCalculatePayrollResults response)
-)
 
 (defn OnGetPayrollGroups [response]
   (let [ 
@@ -328,37 +216,9 @@
 )
 
 
-
-
-
-(defn CalculatePayroll []
-  (
-    (swap! app-state assoc-in [:calculate] 1 )
-    (PUT (str settings/apipath "api/payroll?payrollgroupid=1") {
-      :handler OnCalculatePayroll
-      :error-handler error-handler
-      :headers {
-        :content-type "application/json"
-        :Authorization (str "Bearer "  (:token  (first (:token @t5pcore/app-state)))) }
-    })
-  )
-)
-
-
 (defn getPayrollGroups []
   (GET (str settings/apipath "api/payrollgroups?param=0") {
     :handler OnGetPayrollGroups
-    :error-handler error-handler
-    :headers {
-      :content-type "application/json"
-      :Authorization (str "Bearer "  (:token  (first (:token @t5pcore/app-state)))) }
-  })
-)
-
-
-(defn getCalculationEmployeesCount []
-  (GET (str settings/apipath "api/payroll?payrollgroupid=1") {
-    :handler OnGetEmployeesCount
     :error-handler error-handler
     :headers {
       :content-type "application/json"
@@ -390,20 +250,6 @@
   )
 )
 
-
-(defn buildResultsList []
-  (map
-    (fn [text]
-      (dom/tr {:className "odd gradeX"}
-        (dom/td (:name text))
-        (dom/td (:value text))
-      )
-    )
-    (:calculationresults @app-state )
-  )
-)
-
-
 (def js-selectobject  (clj->js
   {
     :selected true
@@ -412,19 +258,8 @@
 
 
 (defn datatablerow-to-payrollgroup [row]
-  ;(.log js/console (nth row 1))
-  (js/parseInt (nth row 1)) 
-)
-
-
-
-
-(defn showCalculateModal []
-
-  (if (> (count (:selectedpayrollgroups @app-state)) 0)
-    (displayCalculateModal)
-  )
-  ;(.log js/console (str  (:forminstanceid newLeaveApp) ))
+  (.log js/console (nth row 1))
+  (nth row 1)
 )
 
 
@@ -433,8 +268,7 @@
         newdata (map datatablerow-to-payrollgroup selection)
     ]
     (swap! app-state assoc-in [:selectedpayrollgroups] newdata )
-    ;(dorun newdata  )
-    (getCalculationEmployeesCount)
+    (dorun newdata  ) 
   )
 )
 
@@ -457,34 +291,35 @@
 
 
 (defn addModal []
-  (dom/div
-   ;(b/button {:type "button" :className "btn btn-info btn-lg" :data-toggle "modal" :data-target "#myModal"} "Open Modal")
-    (dom/div {:id "calculateModal" :className "modal fade" :role "dialog"}
-      (dom/div {:className "modal-dialog"} 
-        ;;Modal content
-        (dom/div {:className "modal-content"} 
-          (dom/div {:className "modal-header"} 
-            (b/button {:type "button" :className "close" :data-dismiss "modal"})
-            (dom/h4 {:className "modal-title"} (:modalTitle @app-state) )
-          )
-          (dom/div {:className "modal-body"}
-            (dom/p (:modalText @app-state))
-          )
-          (dom/div {:className "modal-footer"}
-            (b/button {:type "button" :className (if (= (:calculate @app-state) 0) "btn btn-warning" "btn btn-warning m-progress" ) :onClick (fn [e](CalculatePayroll))} "Calculate")
-            (b/button {:type "button" :className "btn btn-default" :data-dismiss "modal"} "Close")
-          )
-        )
-      )
-    )
-            
-    (dom/div
+   (dom/div
 
-     ( b/button {:bs-style "primary"
-                 :onClick (fn [e](calculateEmployees))
-                 :disabled? (not= (:calculate @app-state) 0)  } "Submit")
-     )   
+   ;(b/button {:type "button" :className "btn btn-info btn-lg" :data-toggle "modal" :data-target "#myModal"} "Open Modal")
+           (dom/div {:id "leaveModal" :className "modal fade" :role "dialog"}
+                    (dom/div {:className "modal-dialog"} 
+                             ;;Modal content
+                             (dom/div {:className "modal-content"} 
+                                      (dom/div {:className "modal-header"} 
+                                               (b/button {:type "button" :className "close" :data-dismiss "modal"})
+                                               (dom/h4 {:className "modal-title"} (:modalTitle @app-state) )
+                                               )
+                                      (dom/div {:className "modal-body"}
+                                               (dom/p (:modalText @app-state))
+                                               )
+                                      (dom/div {:className "modal-footer"}
+                                               (b/button {:type "button" :className "btn btn-default" :data-dismiss "modal"} "Close")
+                                               )
+                                      )
+                             )
+                    )
+            
+           (dom/div
+
+            ( b/button {:bs-style "primary"
+                        :onClick (fn [e](calculateEmployees))
+                        :disabled? (not= true  true)  } "Submit")
+            )   
    )
+
 )
 
 (defn buildLoadingWrapper [data]
@@ -546,37 +381,6 @@
         )
       )
     )
-
-
-    (if (> (count (:calculationresults @app-state)) 0)
-
-      (dom/div {:className "row"}
-        (dom/div {:className "col-lg-12"}
-          (dom/div {:className "panel panel-default"}
-            (dom/div {:className "panel-heading"} "Salary nd Income Tax Calculation Results")
-
-
-            (dom/div {:className "panel-body"}
-              (dom/div {:className "dataTable_wrapper"}
-                (dom/table {:className "table table-striped table-bordered table-hover" :id "dataTables-results" :style {:width "100%" :cellspacing "0"}}
-                  (dom/thead
-                    (dom/tr
-                      (dom/th (t (t5pcore/numtolang  (:language (:User @t5pcore/app-state))) my-tconfig :payrollgroupslist/employee) )
-                      (dom/th  (t (t5pcore/numtolang  (:language (:User @t5pcore/app-state))) my-tconfig :payrollgroupslist/value) )
-                    )
-                  )
-                  (dom/tbody
-                    (buildResultsList)
-                  )
-                )
-              )
-            )
-          )
-        )
-      )
-
-    )
-
     (addModal)
   )
   
@@ -593,11 +397,6 @@
     (getPayrollGroups)
     (UpdatePayrollGroupsDataTable)
   )
-
-  (if (> (count (:calculationresults @app-state) )  0)
-    (UpdateResultsDataTable)
-  )
-
 )
 
 (defn onDidUpdate []
@@ -608,19 +407,10 @@
        )
      )
    )
-   (.log js/console (str "Update happened state =" (:state @app-state)
-     " payrollgroups count = " (count (:payrollgroups @app-state)))
-     " calculation results count =  " (count (:calculationresults @app-state))
-   ) 
+   (.log js/console (str "Update happened state =" (:state @app-state) " payrollgroups count = " (count (:payrollgroups @app-state))) ) 
    (if (> (count (:payrollgroups @app-state)) 0)
      (if (= (:state @app-state) 0)
        (UpdatePayrollGroupsDataTable) 
-     )
-   )
-
-   (if (> (count (:calculationresults @app-state)) 0)
-     (if (not= (:state @app-state) 3)
-       (UpdateResultsDataTable)
      )
    )
 )
@@ -640,6 +430,7 @@
         (buildMainWrapper data)
         (buildLoadingWrapper data)
       )
+      
     )
   )
 )
@@ -647,7 +438,7 @@
 
 
 
-(sec/defroute payrollcalculation-page "/payrollcalculation" []
+(sec/defroute payrollcalculation-page "/editlist" []
   (om/root payrollcalculation-page-view
            app-state
            {:target (. js/document (getElementById "app"))}))

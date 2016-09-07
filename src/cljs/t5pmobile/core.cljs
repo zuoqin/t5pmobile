@@ -13,7 +13,7 @@
 
 (enable-console-print!)
 
-(defonce app-state (atom {:view 2 :current "Home"}))
+(defonce app-state (atom {:view 1 :current "Home"}))
 
 
 (def jquery (js* "$"))
@@ -241,6 +241,11 @@
   (swap! app-state assoc-in [:view]   0 )
 )
 
+
+(defn goEPortal [data]
+  (swap! app-state assoc-in [:view] 1 )
+)
+
 (defn displayUserSettingsBlock [data]
   (dom/li {:className "dropdown"}
     (dom/a {:className "dropdown-toggle" :data-toggle "dropdown" :href "#" }
@@ -262,9 +267,9 @@
       )
       (dom/li {:className "divider"})
       (dom/li
-        (dom/a {:href "#/login" :onClick (fn [e](doLogout data))} 
+        (dom/a {:href "#/eportal" :onClick (fn [e](goEPortal data))} 
           (dom/i {:className "fa fa-sign-out fa-fw"})
-          "Logout"
+          "ePortal"
         )
       )
     )
