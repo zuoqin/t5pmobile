@@ -26,7 +26,8 @@ let main argv =
     id <- Processor.crud.PostAndReply( fun reply -> Processor.ExportOrganizations(OutputFile, id, reply) )
 
     id <- Processor.crud.PostAndReply( fun reply -> Processor.ExportPositions(OutputFile, id, reply) )
-
+    
+    id <- Processor.crud.PostAndReply( fun reply -> Processor.ExportPayrollGroups(OutputFile, id, reply) )
 
     id <- Processor.crud.PostAndReply( fun reply -> Processor.ExportEmployees(OutputFile, id, reply) )
 

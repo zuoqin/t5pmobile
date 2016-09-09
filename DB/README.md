@@ -38,14 +38,26 @@ schema_tx = Util.readAll(schema_rdr).get(0);
 
 txResult = conn.transact(schema_tx).get();
 
-data_rdr = new FileReader("E:/T5PSVN/branches/research-mobile/WEB/t5pmobile/DB/take5-data0.edn");
+data_rdr = new FileReader("E:/T5PSVN/branches/research-mobile/WEB/t5pmobile/DB/output.clj");
 
 data_tx = Util.readAll(data_rdr).get(0);
 
 data_rdr.close();
 
-txResult = conn.transact(data_tx).get()
+txResult = conn.transact(data_tx).get();
 
 Peer.query("[:find ?c :where [?c :user/code]]",conn.db());
 
 Peer.deleteDatabase(uri);
+
+[:find ?c
+ :where
+ [?c :employee/english ?c_name]
+ [?c :employee/payrollgroup ?p]
+ [?p :payrollgroup/english "MACAU "]
+]
+
+[:find ?entity ?name ?score
+ :where
+ [(fulltext $ :employee/english "ad*") [[?entity ?name ?tx ?score]]]
+]

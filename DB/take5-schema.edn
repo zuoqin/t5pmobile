@@ -33,6 +33,7 @@
 
  {:db/id #db/id[:db.part/db]
   :db/ident :employee/english
+  :db/fulltext true
   :db/valueType :db.type/string
   :db/cardinality :db.cardinality/one
   :db/doc "A employee english name"
@@ -41,10 +42,19 @@
 
  {:db/id #db/id[:db.part/db]
   :db/ident :employee/chinese
+  :db/fulltext true  
   :db/valueType :db.type/string
   :db/cardinality :db.cardinality/one
   :db/doc "A employee chinese name"
   :db.install/_attribute :db.part/db}
+
+ {:db/id #db/id[:db.part/db]
+  :db/ident :employee/payrollgroup
+  :db/valueType :db.type/ref
+  :db/cardinality :db.cardinality/one
+  :db/doc "PayrollGroup which has budget for this employee"
+  :db.install/_attribute :db.part/db}
+
   
  {:db/id #db/id[:db.part/db]
   :db/ident :employee/positions
@@ -64,6 +74,7 @@
 
  {:db/id #db/id[:db.part/db]
   :db/ident :position/english
+  :db/fulltext true  
   :db/valueType :db.type/string
   :db/cardinality :db.cardinality/one
   :db/doc "Position english title"
@@ -71,6 +82,7 @@
 
  {:db/id #db/id[:db.part/db]
   :db/ident :position/chinese
+  :db/fulltext true  
   :db/valueType :db.type/string
   :db/cardinality :db.cardinality/one
   :db/doc "Position chinese title"
@@ -87,7 +99,16 @@
   :db.install/_attribute :db.part/db}
 
  {:db/id #db/id[:db.part/db]
+  :db/ident :organization/orgcode
+  :db/fulltext true  
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/doc "An organization code"
+  :db.install/_attribute :db.part/db}
+
+ {:db/id #db/id[:db.part/db]
   :db/ident :organization/english
+  :db/fulltext true  
   :db/valueType :db.type/string
   :db/cardinality :db.cardinality/one
   :db/doc "An organization english name"
@@ -95,12 +116,36 @@
 
  {:db/id #db/id[:db.part/db]
   :db/ident :organization/chinese
+  :db/fulltext true  
   :db/valueType :db.type/string
   :db/cardinality :db.cardinality/one
   :db/doc "An organization chinese name"
   :db.install/_attribute :db.part/db}
 
 
+;; payrollgroup
+ {:db/id #db/id[:db.part/db]
+  :db/ident :payrollgroup/payrollgroupid
+  :db/valueType :db.type/long
+  :db/unique :db.unique/identity
+  :db/cardinality :db.cardinality/one
+  :db/doc "Payrollgroup identifier"
+  :db.install/_attribute :db.part/db}
 
+ {:db/id #db/id[:db.part/db]
+  :db/ident :payrollgroup/english
+  :db/fulltext true  
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/doc "Payrollgroup english name"
+  :db.install/_attribute :db.part/db}
+
+ {:db/id #db/id[:db.part/db]
+  :db/ident :payrollgroup/chinese
+  :db/fulltext true  
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/doc "Payrollgroup chinese name"
+  :db.install/_attribute :db.part/db}
 
  ]
