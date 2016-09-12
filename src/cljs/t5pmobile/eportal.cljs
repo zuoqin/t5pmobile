@@ -47,7 +47,7 @@
             (dom/tbody
               (dom/tr
                 (dom/td #js {:rowSpan "3" :className "portrait"}
-                  (dom/img {:src (str settings/apipath  "Content/Portrait/charles.jpg") :className "img-rounded portrait"})
+                  (dom/img {:src (:portrait (:Employee @t5pcore/app-state) ) :className "img-rounded portrait"})
                 )
                 (dom/td {:className "tdtable"} (:EmpName (:Employee data) ) 
                 )

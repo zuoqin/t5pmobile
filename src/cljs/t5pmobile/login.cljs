@@ -145,7 +145,9 @@
 (defn OnGetEmployee [response]
   (
     let [     
-      newdata {:empid (get (get response "Emphr") "empid")  :EmpName (get (get response "Emphr") "EmpName") :Roster (get response "RosterList")  }
+      newdata {:empid (get (get response "Emphr") "empid")
+               :portrait (get (get response "Emphr") "portrait")
+               :EmpName (get (get response "Emphr") "EmpName") :Roster (get response "RosterList")  }
     ]
     (swap! t5pcore/app-state assoc-in [:Employee] newdata )
   )
@@ -200,7 +202,7 @@
 )
 
 (defn dologin [username password]
-  (POST (str settings/apipath "Token") {:handler OnLogin
+  (POST (str settings/apipath "token") {:handler OnLogin
                                             :error-handler OnLoginError
                                             :headers {:content-type "application/x-www-form-urlencoded"}
                                             :body (str "grant_type=password&username=" username "&password=" password) 

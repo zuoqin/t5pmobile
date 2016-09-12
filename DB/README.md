@@ -61,3 +61,10 @@ Peer.deleteDatabase(uri);
  :where
  [(fulltext $ :employee/english "ad*") [[?entity ?name ?tx ?score]]]
 ]
+
+
+[:find ?employee
+ :in $ ?reference ?name
+ :where
+ [?employee ?reference ?name]
+]

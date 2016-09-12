@@ -4,6 +4,7 @@
   :db/ident :user/code
   :db/valueType :db.type/string
   :db/cardinality :db.cardinality/one
+  :db/unique :db.unique/identity  
   :db/fulltext true
   :db/doc "A user's login"
   :db.install/_attribute :db.part/db}
@@ -16,6 +17,27 @@
   :db.install/_attribute :db.part/db}
 
  {:db/id #db/id[:db.part/db]
+  :db/ident :user/datemask
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/doc "A user's date format mask"
+  :db.install/_attribute :db.part/db}
+
+ {:db/id #db/id[:db.part/db]
+  :db/ident :user/timemask
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/doc "A user's time format mask"
+  :db.install/_attribute :db.part/db}
+
+ {:db/id #db/id[:db.part/db]
+  :db/ident :user/language
+  :db/valueType :db.type/int
+  :db/cardinality :db.cardinality/one
+  :db/doc "A user's preferred language"
+  :db.install/_attribute :db.part/db}
+
+ {:db/id #db/id[:db.part/db]
   :db/ident :user/employee
   :db/valueType :db.type/ref
   :db/cardinality :db.cardinality/one
@@ -23,14 +45,6 @@
   :db.install/_attribute :db.part/db}
 
  ;; employee
- {:db/id #db/id[:db.part/db]
-  :db/ident :employee/empid
-  :db/valueType :db.type/long
-  :db/cardinality :db.cardinality/one
-  :db/unique :db.unique/identity
-  :db/doc "A unique employee identificator"
-  :db.install/_attribute :db.part/db}
-
  {:db/id #db/id[:db.part/db]
   :db/ident :employee/english
   :db/fulltext true
@@ -91,14 +105,6 @@
 
 ;; organization
  {:db/id #db/id[:db.part/db]
-  :db/ident :organization/orgid
-  :db/valueType :db.type/long
-  :db/unique :db.unique/identity
-  :db/cardinality :db.cardinality/one
-  :db/doc "Organization identifier"
-  :db.install/_attribute :db.part/db}
-
- {:db/id #db/id[:db.part/db]
   :db/ident :organization/orgcode
   :db/fulltext true  
   :db/valueType :db.type/string
@@ -125,14 +131,6 @@
 
 ;; payrollgroup
  {:db/id #db/id[:db.part/db]
-  :db/ident :payrollgroup/payrollgroupid
-  :db/valueType :db.type/long
-  :db/unique :db.unique/identity
-  :db/cardinality :db.cardinality/one
-  :db/doc "Payrollgroup identifier"
-  :db.install/_attribute :db.part/db}
-
- {:db/id #db/id[:db.part/db]
   :db/ident :payrollgroup/english
   :db/fulltext true  
   :db/valueType :db.type/string
@@ -147,5 +145,51 @@
   :db/cardinality :db.cardinality/one
   :db/doc "Payrollgroup chinese name"
   :db.install/_attribute :db.part/db}
+
+
+ ;; sysmenu
+ {:db/id #db/id[:db.part/db]
+  :db/ident :sysmenu/menucode
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/fulltext true
+  :db.install/_attribute :db.part/db}
+
+ {:db/id #db/id[:db.part/db]
+  :db/ident :sysmenu/chinese
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db.install/_attribute :db.part/db}
+
+ {:db/id #db/id[:db.part/db]
+  :db/ident :sysmenu/english
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db.install/_attribute :db.part/db}
+
+ {:db/id #db/id[:db.part/db]
+  :db/ident :sysmenu/sumenu
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/doc "A user's time format mask"
+  :db.install/_attribute :db.part/db}
+
+ {:db/id #db/id[:db.part/db]
+  :db/ident :sysmenu/menuopt
+  :db/valueType :db.type/int
+  :db/cardinality :db.cardinality/one
+  :db.install/_attribute :db.part/db}
+
+ {:db/id #db/id[:db.part/db]
+  :db/ident :sysmenu/menuorder
+  :db/valueType :db.type/int
+  :db/cardinality :db.cardinality/one
+  :db.install/_attribute :db.part/db}
+
+ {:db/id #db/id[:db.part/db]
+  :db/ident :sysmenu/menulevel
+  :db/valueType :db.type/int
+  :db/cardinality :db.cardinality/one
+  :db.install/_attribute :db.part/db}  
 
  ]
