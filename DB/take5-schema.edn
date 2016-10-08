@@ -32,7 +32,7 @@
 
  {:db/id #db/id[:db.part/db]
   :db/ident :user/language
-  :db/valueType :db.type/int
+  :db/valueType :db.type/long
   :db/cardinality :db.cardinality/one
   :db/doc "A user's preferred language"
   :db.install/_attribute :db.part/db}
@@ -168,7 +168,14 @@
   :db.install/_attribute :db.part/db}
 
  {:db/id #db/id[:db.part/db]
-  :db/ident :sysmenu/sumenu
+  :db/ident :sysmenu/submenu
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/doc "A user's time format mask"
+  :db.install/_attribute :db.part/db}
+
+ {:db/id #db/id[:db.part/db]
+  :db/ident :sysmenu/urltarget
   :db/valueType :db.type/string
   :db/cardinality :db.cardinality/one
   :db/doc "A user's time format mask"
@@ -176,20 +183,88 @@
 
  {:db/id #db/id[:db.part/db]
   :db/ident :sysmenu/menuopt
-  :db/valueType :db.type/int
+  :db/valueType :db.type/long
   :db/cardinality :db.cardinality/one
   :db.install/_attribute :db.part/db}
 
  {:db/id #db/id[:db.part/db]
   :db/ident :sysmenu/menuorder
-  :db/valueType :db.type/int
+  :db/valueType :db.type/long
   :db/cardinality :db.cardinality/one
   :db.install/_attribute :db.part/db}
 
  {:db/id #db/id[:db.part/db]
   :db/ident :sysmenu/menulevel
-  :db/valueType :db.type/int
+  :db/valueType :db.type/long
   :db/cardinality :db.cardinality/one
   :db.install/_attribute :db.part/db}  
+
+
+;; messages
+ {:db/id #db/id[:db.part/db]
+  :db/ident :message/sender
+  :db/valueType :db.type/ref
+  :db/cardinality :db.cardinality/one
+  :db/doc "Employee who sent message"
+  :db.install/_attribute :db.part/db}
+
+ {:db/id #db/id[:db.part/db]
+  :db/ident :message/To
+  :db/valueType :db.type/ref
+  :db/cardinality :db.cardinality/many
+  :db/doc "Receipients for the message"
+  :db.install/_attribute :db.part/db}
+
+ {:db/id #db/id[:db.part/db]
+  :db/ident :message/CC
+  :db/valueType :db.type/ref
+  :db/cardinality :db.cardinality/many
+  :db/doc "Receipients for the message"
+  :db.install/_attribute :db.part/db}
+
+ {:db/id #db/id[:db.part/db]
+  :db/ident :message/Bcc
+  :db/valueType :db.type/ref
+  :db/cardinality :db.cardinality/many
+  :db/doc "Receipients for the message"
+  :db.install/_attribute :db.part/db}
+
+ {:db/id #db/id[:db.part/db]
+  :db/ident :message/senddate
+  :db/valueType :db.type/instant
+  :db/cardinality :db.cardinality/one
+  :db/doc "Messsage sent time"
+  :db.install/_attribute :db.part/db}  
+
+ {:db/id #db/id[:db.part/db]
+  :db/ident :message/status
+  :db/valueType :db.type/long
+  :db/cardinality :db.cardinality/one
+  :db/doc "Messsage status"
+  :db.install/_attribute :db.part/db}  
+
+ {:db/id #db/id[:db.part/db]
+  :db/ident :message/english
+  :db/fulltext true  
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/doc "Message english subject"
+  :db.install/_attribute :db.part/db}
+
+ {:db/id #db/id[:db.part/db]
+  :db/ident :message/chinese
+  :db/fulltext true  
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/doc "Message chinese subject"
+  :db.install/_attribute :db.part/db}
+
+ {:db/id #db/id[:db.part/db]
+  :db/ident :message/body
+  :db/fulltext true  
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/doc "Message Body Text"
+  :db.install/_attribute :db.part/db}
 
  ]

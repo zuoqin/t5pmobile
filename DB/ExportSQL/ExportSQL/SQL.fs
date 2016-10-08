@@ -15,6 +15,7 @@ type Position = {positionid:int; positioncode:string; english:string; chinese : 
 type Employee = {empid:int; payrollgroupid:int; english:string; chinese : string; id : int}
 type User = {userid:int; empid:int; usercode:string; userpassword : string; datemask:string; timemask:string;language:int; id : int}
 type SysMenu = {menucode:string; menulevel:int; menuopt:int; menuorder:int; english:string; chinese:string;submenu:string; urltarget:string; id : int}
+type Message = {messageid:int64; sender:int; senddate:DateTime; english:string; chinese:string;body:string; status:byte; id : int}
 
 [<Literal>]
 let connectionString = @"name=HRMS"
@@ -84,12 +85,19 @@ let getEmployees (outputFile : string, id : int) : int =
     let outFile = new StreamWriter(outputFile, true)
     let mutable newid = id
     do
-        use cmd = new SqlCommandProvider<"SELECT empid, payrollgroupid, english, chinese from emphr",connectionString>()
+        use cmd = new SqlCommandProvider<"SELECT 0 as empid,
+            (select min(payrollgroupid) from payrollgroups) as payrollgroupid,
+            'system' as english, N'系统' as chinese union select empid, payrollgroupid, english, chinese from emphr ",connectionString>()
         
         let items = cmd.Execute()
         for item in items do
+
+            let ispayrollgrouid = 
+                match item.payrollgroupid with 
+                | Some x -> x
+                | None -> 0
             let bResult = employeesmap.Remove(item.empid)
-            let newEmployee = { empid = item.empid; payrollgroupid = item.payrollgroupid; english = item.english; chinese = item.chinese; id = newid}
+            let newEmployee = { empid = item.empid; payrollgroupid = ispayrollgrouid; english = item.english; chinese = item.chinese; id = newid}
             employeesmap.Add(item.empid, newEmployee)
 
             use positionCmd = new SqlCommandProvider<"SELECT positioncode from empposition where empid = @empid",connectionString>()
@@ -104,7 +112,7 @@ let getEmployees (outputFile : string, id : int) : int =
             strPositions <- strPositions + "]"
 
 
-            let (bResult, thePayrollGroup) = payrollgroupsmap.TryGetValue(item.payrollgroupid)
+            let (bResult, thePayrollGroup) = payrollgroupsmap.TryGetValue(ispayrollgrouid)
             if bResult = true then
                 outFile.WriteLine( sprintf "{ :employee/english \"%s\", :employee/chinese \"%s\", :employee/positions %s :employee/payrollgroup  #db/id[:db.part/user %d] :db/id #db/id[:db.part/user %d] }"
                     item.english item.chinese strPositions thePayrollGroup.id newid)
@@ -203,6 +211,81 @@ let getSysMenu (outputFile : string, id : int) : int =
             outFile.WriteLine( sprintf "{ :sysmenu/menucode \"%s\", :sysmenu/menulevel %d :sysmenu/menuopt %d :sysmenu/menuorder % d :sysmenu/chinese \"%s\" :sysmenu/english \"%s\" :sysmenu/submenu \"%s\" :sysmenu/urltarget \"%s\" :db/id #db/id[:db.part/user %d] }"
                 item.menucode item.menulevel item.menuopt item.menuorder item.chinese item.english item.submenu url newid)
             newid <- newid - 1
+
+    outFile.Close()
+    newid
+
+
+
+let getMessages (outputFile : string, id : int) : int = 
+    let outFile = new StreamWriter(outputFile, true)
+    let mutable newid = id
+    do
+        use cmd = new SqlCommandProvider<"
+            SELECT --TOP 20 
+                m.messageid,
+                m.senderempid sender,
+                m.senddate,           
+                m.subject_english english,
+                m.subject_chinese chinese,
+                m.body,    
+                m.[status]
+            FROM
+                [messages] m
+            WHERE
+                m.[status] > 1
+            ORDER BY
+                m.senddate DESC",connectionString>()
+        
+        let items = cmd.Execute()
+        for item in items do
+//            let mutable receiver = 0
+//            match item.receiver with 
+//            | Some x -> receiver <- x
+//            | None -> receiver <- 0
+
+            
+            let mutable body = ""
+            match item.body with 
+            | Some x -> body <- x.Replace("\\", "\\\\")
+            | None -> body <- ""
+
+            body <- body.Replace("\"", "\\\"")
+            let mutable senddate = DateTime()
+            match item.senddate with 
+            | Some x -> senddate <- x
+            | None -> senddate <- DateTime()
+            let newMenu : Message = { messageid = item.messageid; sender = item.sender; senddate = senddate; body=body;
+                english=item.english; chinese=item.chinese; status=item.status; id = newid}
+
+            let (bResult, theSender) = employeesmap.TryGetValue(item.sender)
+            if bResult = true then
+                use recipientCmd = new SqlCommandProvider<"SELECT empid, recipienttype from messagerecipient where messageid = @messageid",connectionString>()
+                let recipients = recipientCmd.Execute(messageid = item.messageid)
+
+                let mutable strToRecipients = "["
+                let mutable strCCRecipients = "["
+                let mutable strBccRecipients = "["
+                for receipient in recipients do
+                    let (bResult, theReceiver) = employeesmap.TryGetValue(receipient.empid)
+                    if bResult = true then
+                        if receipient.recipienttype = (byte) 0 then
+                            strToRecipients <- sprintf "%s #db/id[:db.part/user %d]" strToRecipients theReceiver.id
+                        elif receipient.recipienttype = (byte) 1 then
+                            strCCRecipients <- sprintf "%s #db/id[:db.part/user %d]" strCCRecipients theReceiver.id
+                        else 
+                            strBccRecipients <- sprintf "%s #db/id[:db.part/user %d]" strBccRecipients theReceiver.id
+
+
+                strToRecipients <- strToRecipients + "]"
+                strCCRecipients <- strCCRecipients + "]"
+                strBccRecipients <- strBccRecipients + "]"
+
+                let senddateStr = senddate.ToString("o")
+
+                outFile.WriteLine( sprintf "{ :message/sender #db/id[:db.part/user %d] :message/To %s :message/CC %s :message/Bcc %s :message/senddate #inst \"%s\" :message/english \"%s\" :message/chinese \"%s\" :message/body \"%s\" :message/status %d :db/id #db/id[:db.part/user %d] }"
+                    theSender.id strToRecipients strCCRecipients strBccRecipients senddateStr  item.english item.chinese body item.status newid)
+                newid <- newid - 1
 
     outFile.Close()
     newid

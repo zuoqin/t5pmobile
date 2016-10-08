@@ -10,6 +10,9 @@
 ;; store database uri
 (def uri "datomic:dev://localhost:4334/take5.test02")
 
+;; delete database
+(d/delete-database uri)
+
 ;; create database
 (d/create-database uri)
 

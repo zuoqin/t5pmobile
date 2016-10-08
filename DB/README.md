@@ -13,6 +13,10 @@ bin\transactor config\samples\dev-transactor-template.properties
 Starting datomic:dev://localhost:4334/<DB-NAME>, storing data in: data ...
 System started datomic:dev://localhost:4334/<DB-NAME>, storing data in: data
 
+
+## Starting Clojure REPL
+bin\repl
+
 ## Starting the Console
 d:
 cd D:\datomic-pro-0.9.5350
@@ -67,4 +71,97 @@ Peer.deleteDatabase(uri);
  :in $ ?reference ?name
  :where
  [?employee ?reference ?name]
+]
+
+[:find ?year
+ :where
+ [?t :message/senddate ?date]
+ [((fn [dt] (+ (.getYear dt) 1900)) ?date) ?year]]
+
+
+[:find ?m
+ :where
+ [?m :message/recipients ?e]
+ [?e :employee/english "Nacho"]
+
+]
+
+
+[:find (count ?e)
+ :where
+ [?m :message/recipients ?e]
+ [?e :employee/english "Nacho"]
+ [(count ?e) ?cnt]
+ [(> ?cnt 0)]
+]
+
+
+[:find ?m
+ :where
+ [?m :message/senddate "Thu Aug 18 18:22:14 CST 2016"]
+ [?m :message/recipients ?e]
+ [?e :employee/english "Nacho"]]
+
+
+ [:find ?m
+ :where
+ [?m :message/senddate #inst "2013-10-25T15:12:06.500-00:00"]
+ [?m :message/status 4]
+ [?m :message/recipients ?e]
+ [?m :message/sender ?e]
+ [?e :employee/english "Nacho"]
+]
+
+
+
+ [:find ?m ?year
+ :where
+ [?m :message/senddate ?date]
+ [?m :message/status 4]
+ [?m :message/recipients ?e]
+ [?m :message/sender ?e]
+ [?e :employee/english "Nacho"]
+ [((fn [dt] (.getTime dt) ) #inst "2018-08-19T00:00:00.000-00:00") ?year]
+
+]
+
+ [:find ?m ?year
+ :where
+ [?m :message/senddate ?date]
+ [?m :message/status 4]
+ [?m :message/recipients ?e]
+ [?m :message/sender ?e]
+ [?e :employee/english "Nacho"]
+ [((fn [dt] (.getTime dt) ) #inst "2016-07-18T00:00:00.000-00:00") ?year]
+]
+
+[:find ?m ?year
+ :where
+ [?m :message/senddate ?date]
+ [?m :message/status 4]
+ [?m :message/recipients ?e]
+ [?m :message/sender ?e]
+ [?e :employee/english "Nacho"]
+ [((fn [dt] (.getTime dt)) ?date) ?year]
+ [(> ?year 1534550400000)]
+ [(< ?year 1534636800000)]
+]
+
+[:find ?m ?year
+ :where
+ [?m :message/senddate ?date]
+ [((fn [dt] (.getTime dt)) ?date) ?year]
+ [(> ?year 1534464000000)]
+ [(< ?year 1534550400000)]
+]
+
+
+[:find ?m ?year
+ :where
+ [?m :message/senddate ?date]
+ [?m :message/recipients ?e]
+ [?e :employee/english "Nacho"]
+ [((fn [dt] (.getTime dt)) ?date) ?year]
+ [(> ?year 1468800000000)]
+ [(< ?year 1468886400000)]
 ]
