@@ -44,6 +44,119 @@
   :db/doc "A user's employee"
   :db.install/_attribute :db.part/db}
 
+
+;; new employee
+ {:db/id #db/id[:db.part/db]
+  :db/ident :emp_new/english
+  :db/fulltext true
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/doc "A new employee english name"
+  :db.install/_attribute :db.part/db}
+
+{:db/id #db/id[:db.part/db]
+  :db/ident :emp_new/chinese
+  :db/fulltext true  
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/doc "A new employee chinese name"
+  :db.install/_attribute :db.part/db}
+
+
+ {:db/id #db/id[:db.part/db]
+  :db/ident :emp_new/payrollgroup
+  :db/valueType :db.type/ref
+  :db/cardinality :db.cardinality/one
+  :db/doc "PayrollGroup which has budget for this new employee"
+  :db.install/_attribute :db.part/db}  
+
+
+ {:db/id #db/id[:db.part/db]
+  :db/ident :emp_new/hirestatus
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/doc "Hire status for new employee"
+  :db.install/_attribute :db.part/db}
+
+ {:db/id #db/id[:db.part/db]
+  :db/ident :emp_new/empcode
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/doc "Employee code for new employee"
+  :db.install/_attribute :db.part/db}
+
+ {:db/id #db/id[:db.part/db]
+  :db/ident :emp_new/positioncode
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/doc "Employee code for new employee"
+  :db.install/_attribute :db.part/db}
+
+ {:db/id #db/id[:db.part/db]
+  :db/ident :emp_new/birthday
+  :db/valueType :db.type/instant
+  :db/cardinality :db.cardinality/one
+  :db/doc "Employee birthday"
+  :db.install/_attribute :db.part/db}    
+
+ {:db/id #db/id[:db.part/db]
+  :db/ident :emp_new/gender
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/doc "New Employee gender"
+  :db.install/_attribute :db.part/db}
+
+ {:db/id #db/id[:db.part/db]
+  :db/ident :emp_new/major
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/doc "New Employee major"
+  :db.install/_attribute :db.part/db}
+
+ {:db/id #db/id[:db.part/db]
+  :db/ident :emp_new/hiredate
+  :db/valueType :db.type/instant
+  :db/cardinality :db.cardinality/one
+  :db/doc "New employee hire date"
+  :db.install/_attribute :db.part/db}  
+
+ {:db/id #db/id[:db.part/db]
+  :db/ident :emp_new/degree
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/doc "New Employee degree"
+  :db.install/_attribute :db.part/db}
+
+ {:db/id #db/id[:db.part/db]
+  :db/ident :emp_new/orgcode1
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/doc "New Employee degree"
+  :db.install/_attribute :db.part/db}
+
+{:db/id #db/id[:db.part/db]
+  :db/ident :emp_new/orgcode2
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/doc "New Employee degree"
+  :db.install/_attribute :db.part/db}
+
+{:db/id #db/id[:db.part/db]
+  :db/ident :emp_new/orgcode3
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/doc "New Employee degree"
+  :db.install/_attribute :db.part/db}
+
+
+{:db/id #db/id[:db.part/db]
+  :db/ident :emp_new/orgcode4
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/doc "New Employee degree"
+  :db.install/_attribute :db.part/db}
+
+
  ;; employee
  {:db/id #db/id[:db.part/db]
   :db/ident :employee/english
@@ -63,6 +176,14 @@
   :db.install/_attribute :db.part/db}
 
  {:db/id #db/id[:db.part/db]
+  :db/ident :employee/portrait
+  :db/fulltext true  
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/doc "A employee photo"
+  :db.install/_attribute :db.part/db}
+
+ {:db/id #db/id[:db.part/db]
   :db/ident :employee/payrollgroup
   :db/valueType :db.type/ref
   :db/cardinality :db.cardinality/one
@@ -78,7 +199,23 @@
   :db.install/_attribute :db.part/db}
 
 
+ {:db/id #db/id[:db.part/db]
+  :db/ident :employee/birthday
+  :db/valueType :db.type/instant
+  :db/cardinality :db.cardinality/one
+  :db/doc "Employee birthday"
+  :db.install/_attribute :db.part/db}    
+
+
 ;; position
+ {:db/id #db/id[:db.part/db]
+  :db/ident :position/positioncode
+  :db/fulltext true  
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/doc "Position code"
+  :db.install/_attribute :db.part/db}
+
  {:db/id #db/id[:db.part/db]
   :db/ident :position/organization
   :db/valueType :db.type/ref
@@ -200,6 +337,31 @@
   :db.install/_attribute :db.part/db}  
 
 
+
+ ;; recipient/type enum values
+ [:db/add #db/id[:db.part/user] :db/ident :recipient.type/to]
+ [:db/add #db/id[:db.part/user] :db/ident :recipient.type/cc]
+ [:db/add #db/id[:db.part/user] :db/ident :recipient.type/bcc]
+
+;; recipients
+ {
+  :db/id #db/id[:db.part/db]
+  :db/ident :recipient/employee
+  :db/valueType :db.type/ref
+  :db/cardinality :db.cardinality/one
+  :db/doc "Employee - Receipient"
+  :db.install/_attribute :db.part/db
+ }
+
+
+ {:db/id #db/id[:db.part/db]
+  :db/ident :recipient/type
+  :db/valueType :db.type/ref
+  :db/cardinality :db.cardinality/one
+  :db/doc "A recipient type enum value"
+  :db.install/_attribute :db.part/db}
+
+
 ;; messages
  {:db/id #db/id[:db.part/db]
   :db/ident :message/sender
@@ -209,21 +371,7 @@
   :db.install/_attribute :db.part/db}
 
  {:db/id #db/id[:db.part/db]
-  :db/ident :message/To
-  :db/valueType :db.type/ref
-  :db/cardinality :db.cardinality/many
-  :db/doc "Receipients for the message"
-  :db.install/_attribute :db.part/db}
-
- {:db/id #db/id[:db.part/db]
-  :db/ident :message/CC
-  :db/valueType :db.type/ref
-  :db/cardinality :db.cardinality/many
-  :db/doc "Receipients for the message"
-  :db.install/_attribute :db.part/db}
-
- {:db/id #db/id[:db.part/db]
-  :db/ident :message/Bcc
+  :db/ident :message/recipients
   :db/valueType :db.type/ref
   :db/cardinality :db.cardinality/many
   :db/doc "Receipients for the message"

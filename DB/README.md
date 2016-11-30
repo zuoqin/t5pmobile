@@ -76,7 +76,7 @@ Peer.deleteDatabase(uri);
 [:find ?year
  :where
  [?t :message/senddate ?date]
- [((fn [dt] (+ (.getYear dt) 1900)) ?date) ?year]]
+ [((fn [dt] (+ dt 1900)) ?date) ?year]]
 
 
 [:find ?m
@@ -86,6 +86,20 @@ Peer.deleteDatabase(uri);
 
 ]
 
+
+[:find ?date ?en ?ch ?m ?type
+ :in $ ?login
+ :where
+ [?m :message/senddate ?date]
+ [?m :message/Recipients ?r]
+ [?r :recipient/type ?t]
+ [?r :recipient/employee ?e]
+ [?u :user/employee ?e]
+ [?u :user/code ?login]
+ [?m :message/chinese ?ch]
+ [?m :message/english ?en]
+ [((fn [dt] (if (= dt :recipient.type/to) "To" "CC")) ?t) type]
+]
 
 [:find (count ?e)
  :where
@@ -139,12 +153,13 @@ Peer.deleteDatabase(uri);
  :where
  [?m :message/senddate ?date]
  [?m :message/status 4]
- [?m :message/recipients ?e]
+ [?m :message/recipients ?r]
+ [?r :recipient/employee ?e]
  [?m :message/sender ?e]
  [?e :employee/english "Nacho"]
  [((fn [dt] (.getTime dt)) ?date) ?year]
- [(> ?year 1534550400000)]
- [(< ?year 1534636800000)]
+ [(> ?year 534550400000)]
+ [(< ?year 9534636800000)]
 ]
 
 [:find ?m ?year
@@ -165,3 +180,29 @@ Peer.deleteDatabase(uri);
  [(> ?year 1468800000000)]
  [(< ?year 1468886400000)]
 ]
+
+
+[:find ?entity ?to ?isCc ?isBcc ?e ?c ?s ?b
+ :in $ ?entity
+ :where
+ [?entity :message/To ?to]
+ [(missing? $ ?entity :message/CC) ?isCc]
+ [(missing? $ ?entity :message/Bcc) ?isBcc]
+ [?entity :message/english ?e]
+ [?entity :message/chinese ?c]
+ [?entity :message/senddate ?s]
+ [?entity :message/body ?b]
+ [?entity]
+]
+
+
+[:find ?eid
+ :in $ [?t ...]
+ :where
+ [?eid :db/ident ?t]
+]
+[?t ...] [:recipient.type/to :recipient.type/cc :recipient.type/bcc]
+
+
+17592186080614 two recipients
+

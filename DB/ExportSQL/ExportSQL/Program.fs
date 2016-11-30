@@ -31,6 +31,8 @@ let main argv =
 
     id <- Processor.crud.PostAndReply( fun reply -> Processor.ExportEmployees(OutputFile, id, reply) )
 
+    id <- Processor.crud.PostAndReply( fun reply -> Processor.ExportNewEmployees(OutputFile, id, reply) )
+
     id <- Processor.crud.PostAndReply( fun reply -> Processor.ExportUsers(OutputFile, id, reply) )
 
     id <- Processor.crud.PostAndReply( fun reply -> Processor.ExportSysMenu(OutputFile, id, reply) )

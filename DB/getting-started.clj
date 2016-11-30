@@ -21,6 +21,8 @@
 
 ;; parse schema edn file
 (def schema-tx (read-string (slurp "E:/T5PSVN/branches/research-mobile/WEB/t5pmobile/DB/take5-schema.edn")))
+;;(def schema-tx (read-string (slurp "/root/take5-schema.edn")))
+
 
 ;; display first statement
 (first schema-tx)
@@ -38,6 +40,7 @@
 
 ;; submit seed data transaction
 @(d/transact conn data-tx)
+;@(d/transact-async conn data-tx)
 
 ;; find all communities, return entity ids
 (def results (q '[:find ?c :where [?c :community/name]] (db conn)))

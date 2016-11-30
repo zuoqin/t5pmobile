@@ -36,12 +36,15 @@
 (defn OnGetMessage [response]
   (let [     
       newdata {
-        :sendtime (get response "senddate") :to (get response "To")
+        :sendtime (get response "senddate") 
+        :to (get response "To")
+        :cc (get response "Cc")
         :body (get response "body") :subject (get response "subject") }
     ]
 
     (swap! app-state assoc-in [:sendtime ] (:sendtime newdata) ) 
     (swap! app-state assoc-in [:to ]  (clojure.string/join ", "  (map array-to-string (:to newdata))) ) 
+    (swap! app-state assoc-in [:cc ]  (clojure.string/join ", "  (map array-to-string (:cc newdata))) ) 
     (swap! app-state assoc-in [:body] (:body newdata) ) 
     (swap! app-state assoc-in [:subject ] (:subject newdata) ) 
   )
@@ -110,10 +113,12 @@
               (dom/div {:className "panel-heading"}
                 (dom/h3 {:className "panel-title"} (:subject @app-state))
                 (dom/h5 "发件人: Jane")
-                (dom/h5 "收件人:: "
+                (dom/h5 "收件人: "
                   (dom/span (str (:to @app-state)))
                 )
-                (dom/h5 "抄送: ")
+                (dom/h5 "抄送: "
+                  (dom/span (str (:cc @app-state)))
+                )
                 (dom/h5 (str "时间: "  (:sendtime @app-state)) )
               )
               (dom/div  #js {:className "panel-body" :dangerouslySetInnerHTML #js {:__html (:body @app-state)}} nil)

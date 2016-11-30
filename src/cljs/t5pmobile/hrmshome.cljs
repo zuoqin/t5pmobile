@@ -206,11 +206,11 @@
       )
     )
             
-    (dom/div
+    ; (dom/div
 
-     ( b/button {:bs-style "primary"
-                 :disabled? (not= (:calculate @app-state) 0)  } "Submit")
-     )   
+    ;   (b/button {:bs-style "primary"
+    ;              :disabled? (not= (:calculate @app-state) 0)  } "Submit")
+    ; )   
    )
 )
 

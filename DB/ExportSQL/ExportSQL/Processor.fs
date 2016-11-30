@@ -5,6 +5,7 @@ type CRUDBlogMessage =
     | ExportOrganizations of string * int * AsyncReplyChannel<int>
     | ExportPositions of string * int * AsyncReplyChannel<int>
     | ExportEmployees of string * int * AsyncReplyChannel<int>
+    | ExportNewEmployees of string * int * AsyncReplyChannel<int>
     | ExportPayrollGroups of string * int * AsyncReplyChannel<int>
     | ExportUsers of string * int * AsyncReplyChannel<int>
     | ExportSysMenu of string * int * AsyncReplyChannel<int>
@@ -25,6 +26,10 @@ let crud = MailboxProcessor.Start(fun agent ->
 
         | ExportEmployees ( outputFile, id, reply ) ->
             let id = SQL.getEmployees(outputFile, id)
+            reply.Reply id
+
+        | ExportNewEmployees ( outputFile, id, reply ) ->
+            let id = SQL.getNewEmployees(outputFile, id)
             reply.Reply id
 
         | ExportPayrollGroups ( outputFile, id, reply ) ->

@@ -301,7 +301,12 @@
     46 (jquery
          (fn []
            (-> (jquery "#payrollgroups" )
-               (.selectpicker "val" (:payrollgroupid (:employee @app-state)))
+               (.selectpicker "val"
+                 (if (nil? (:payrollgroupid (:employee @app-state)))
+                   (:payrollgroups (:form @app-state))
+                   (:payrollgroupid (:employee @app-state))
+                   
+                   ) )
            )
          )
        )
@@ -594,10 +599,9 @@
                                  :className "selectpicker"
                                  :data-show-subtext "true"
                                  :data-live-search "true"
-                                 :style {:border-color "#a94442"}
-                                 :data-none-selected-text "To be selected"
+                                 :onChange #(handle-change % owner)
                                  }
-                (dom/option {:key 0 :data-subtext "" :value 0} "")
+                ;(dom/option {:key 0 :data-subtext "" :value 0} "")
                 (buildOrganizationsList data owner)
               )            
             )
