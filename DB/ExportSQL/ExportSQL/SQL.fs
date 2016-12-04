@@ -34,7 +34,11 @@ let getPayrollGroups (outputFile : string, id : int) : int =
     let outFile = new StreamWriter(outputFile, true)
     let mutable newid = id
     do
-        use cmd = new SqlCommandProvider<"SELECT payrollgroupid, english, chinese from payrollgroups",connectionString>()
+        use cmd = new SqlCommandProvider<"
+            select 0 as payrollgroupid,
+            'system' as english, N'系统' as chinese
+            union
+            SELECT payrollgroupid, english, chinese from payrollgroups",connectionString>()
         
         let items = cmd.Execute()        
         for item in items do

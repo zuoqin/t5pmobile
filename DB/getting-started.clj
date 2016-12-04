@@ -32,6 +32,8 @@
 
 ;; parse seed data edn file
 (def data-tx (read-string (slurp "E:/T5PSVN/branches/research-mobile/WEB/t5pmobile/DB/output.clj")))
+;;(def data-tx (read-string (slurp "/root/output.clj")))
+
 
 ;; display first three statements in seed data transaction
 (first data-tx)

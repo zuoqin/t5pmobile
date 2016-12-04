@@ -195,6 +195,13 @@ Peer.deleteDatabase(uri);
  [?entity]
 ]
 
+[:find ?eid
+ :in $ ?eid
+ :where
+ [?eid]
+]
+
+
 
 [:find ?eid
  :in $ [?t ...]
@@ -205,4 +212,9 @@ Peer.deleteDatabase(uri);
 
 
 17592186080614 two recipients
+[:find ?e
+ :in $ ?empcode
+ :where
+ [?e :emp_new/empcode ?empcode]
+]
 

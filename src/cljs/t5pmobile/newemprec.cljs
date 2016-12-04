@@ -290,37 +290,52 @@
           )
         )
     45 (jquery
-        (fn []
-          (-> (jquery "#positions" )
-              (.selectpicker {})
-              )      
-          )
-        )
+         (fn []
+           (-> (jquery "#positions" )
+             (.selectpicker "val"
+               (if (nil? (:positionid (:employee @app-state)))
+                 (:positions (:form @app-state))
+                 (:positionid (:employee @app-state))                   
+               )
+             )
+           )      
+         )
+       )
 
 
     46 (jquery
          (fn []
            (-> (jquery "#payrollgroups" )
-               (.selectpicker "val"
-                 (if (nil? (:payrollgroupid (:employee @app-state)))
-                   (:payrollgroups (:form @app-state))
-                   (:payrollgroupid (:employee @app-state))
-                   
-                   ) )
+             (.selectpicker "val"
+               (if (nil? (:payrollgroupid (:employee @app-state)))
+                 (:payrollgroups (:form @app-state))
+                 (:payrollgroupid (:employee @app-state))                   
+               )
+             )
            )
          )
        )
     47 (jquery
          (fn []
            (-> (jquery "#organizations" )
-               (.selectpicker "val" (:orgid (:employee @app-state)))
+             (.selectpicker "val"
+               (if (nil? (:orgid (:employee @app-state)))
+                 (:organizations (:form @app-state))
+                 (:orgid (:employee @app-state))                   
+               )
+             )
            )
          )
        )
     48 (jquery
          (fn []
            (-> (jquery "#calendars" )
-               (.selectpicker "val" (:calendar (:employee @app-state)))
+             (.selectpicker "val"
+               (if (nil? (:calendar (:employee @app-state)))
+                 (:calendars (:form @app-state))
+                 (:calendar (:employee @app-state))                   
+               )
+             )
            )
          )
        )
